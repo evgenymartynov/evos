@@ -1,7 +1,6 @@
 all:
 	make -C src all
 	scripts/update-image.sh
-	make run
 
 clean:
 	make -C src clean

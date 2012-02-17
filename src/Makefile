@@ -1,8 +1,8 @@
 LDFLAGS=-Tlink.ld
 ASFLAGS=-felf
-CFLAGS=-m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Wall
+CFLAGS=-m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Wall -I.
 
-SOURCES=boot.o main.o
+SOURCES=boot.o main.o ports.o monitor.o
 
 all: $(SOURCES) link
 
