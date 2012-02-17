@@ -1,6 +1,6 @@
 LDFLAGS=-Tlink.ld
 ASFLAGS=-felf
-CFLAGS=-m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Wall -I.
+CFLAGS=-m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Wall -Werror -I.
 
 SOURCES=boot.o main.o ports.o monitor.o
 
