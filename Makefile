@@ -7,6 +7,6 @@ clean:
 	make -C src clean
 
 run:
-	sudo bochs -f bochs.rc
+	bochs -f bochs.rc
 
 .PHONY: all clean run
