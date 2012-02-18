@@ -30,4 +30,6 @@ start:
     push ebx    ; param to kmain
     cli
     call kmain
+
+    hlt
     jmp $
