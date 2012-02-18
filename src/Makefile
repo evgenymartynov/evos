@@ -2,7 +2,7 @@ LDFLAGS=-Tlink.ld
 ASFLAGS=-felf
 CFLAGS=-m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Wall -Werror -I.
 
-SOURCES=boot.o main.o ports.o monitor.o
+SOURCES=boot.o main.o ports.o monitor.o printk.o
 
 all: $(SOURCES) link
 

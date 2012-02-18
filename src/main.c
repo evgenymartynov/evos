@@ -1,4 +1,5 @@
 #include "monitor.h"
+#include "printk.h"
 
 struct multiboot_t;
 
@@ -25,10 +26,12 @@ int kmain(struct multiboot_t *mboot) {
     monitor_put('4');
     monitor_put('\n');
 
-    for (i = 0; i < 20; i++) {
+    for (i = 5; i < 15; i++) {
         monitor_write_dec(i);
         monitor_put('\n');
     }
+
+    printk(" 123: %d\n4bil: %u\n-123: %d\n", 123, -123, -123);
 
     monitor_write("Reached the end of kmain()\n");
     return 0x00DEFACED;
