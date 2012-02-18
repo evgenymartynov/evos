@@ -1,10 +1,13 @@
 #include "monitor.h"
 #include "printk.h"
+#include "gdt.h"
 
 struct multiboot_t;
 
 int kmain(struct multiboot_t *mboot) {
     monitor_clear();
+    init_gdt();
+
     int i;
     for (i = 0; i < 80; i++)
         monitor_put(1);
