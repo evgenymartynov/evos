@@ -13,9 +13,10 @@ typedef char* va_list;
     ( va += __va_stacksize(type),  *(type*)(va - __va_stacksize(type)) )
 #define va_end(va)
 
-#define SIGNED 1
+#define SIGNED      1
+#define ZERO_PADDED 2
 
-static char* append_number(char *str, unsigned int value, int flags) {
+static char* append_number(char *str, unsigned int value, int radix, int flags) {
     if (flags & SIGNED) {
         if (value & (1 << (sizeof(value)*8-1))) {
             *str++ = '-';
@@ -23,18 +24,21 @@ static char* append_number(char *str, unsigned int value, int flags) {
         }
     }
 
-    int i;
-    int had_digit = FALSE;
+    const char *digits = "0123456789abcdef";
+    char _buf[20] = {}; // TODO: fix overruns of this
+    char *buf = _buf;
 
-    for (i = 1000000000; i >= 1; i /= 10) {
-        unsigned int digit = (value / i) % 10;
+    unsigned int i = value;
+    do {
+        unsigned int digit = i % radix;
+        *buf++ = digits[digit];
+        i /= radix;
+    } while (i != 0 || ((flags & ZERO_PADDED) && buf-_buf < 8) );
 
-        if (digit == 0 && !had_digit && i != 1)
-            continue;
-
-        *str++ = ('0' + digit);
-        had_digit = TRUE;
-    }
+    do {
+        buf--;
+        *str++ = *buf;
+    } while (buf != _buf);
 
     return str;
 }
@@ -63,7 +67,35 @@ static int vsprintf(const char *fmt, char *buf, va_list args) {
             case 'd':
                 flags |= SIGNED;
             case 'u':
-                str = append_number(str, va_arg(args, int), flags);
+                str = append_number(str, va_arg(args, int), 10, flags);
+                break;
+
+            case 'x':
+                *str++ = '0';
+                *str++ = 'x';
+                str = append_number(str, va_arg(args, int), 16, flags);
+                break;
+
+            case 'o':
+                *str++ = '0';
+                *str++ = 'o';
+                str = append_number(str, va_arg(args, int), 8, flags);
+                break;
+
+            case 'b':
+                *str++ = '0';
+                *str++ = 'b';
+                flags |= ZERO_PADDED;
+                str = append_number(str, va_arg(args, int), 2, flags);
+                break;
+
+            case 's':
+                {
+                    char *param = va_arg(args, char*);
+                    while (*param) {
+                        *str++ = *param++;
+                    }
+                }
                 break;
 
             // TODO: more switches
