@@ -1,10 +1,19 @@
 #include "monitor.h"
 #include "stddef.h"
 
-static uint8_t *video_buffer = (uint8_t*)0xb8000;
+static uint16_t *video_buffer = (uint16_t*)0xb8000;
 static uint16_t cur_x, cur_y;
 
+// Generates a framebuffer word
+#define FB_WORD(ch, at) ( ( (uint16_t)(at) << 8 ) | (uint16_t)(ch) )
+// Generates a framebuffer colour attribute
+#define FB_ATTR(fg, bg) ( ( (uint8_t )(bg) << 4 ) | (uint8_t )(fg) )
+
+static const uint8_t COL_WHITE = 15;
+static const uint8_t COL_BLACK = 0;
 // TODO: define all the colours
+
+static const uint16_t BLANK = FB_WORD(' ', FB_ATTR(15, 0));
 
 static void move_cursor() {
     uint16_t position = 80*cur_y + cur_x;
@@ -14,33 +23,56 @@ static void move_cursor() {
     outb(0x3D5, position & 0xFF);
 }
 
+static void scroll() {
+    if (cur_y == 25) {
+        int i;
+
+        for (i = 0; i < 80*24; i++) {
+            video_buffer[i] = video_buffer[i+80];
+        }
+
+        for (; i < 80*25; i++) {
+            video_buffer[i] = BLANK;
+        }
+
+        cur_y = 24;
+    }
+}
+
 void monitor_put(char value) {
-    uint8_t fg_col = 15, bg_col = 0;
-    uint16_t word = (bg_col << 4) | (fg_col & 0x0F);
-    word <<= 8;
+    if (value == 0x08) {
+        // backspace
+        if (cur_x) {
+            cur_x--;
+        }
+    } else if (value == '\t') {
+        cur_x = (cur_x + 8) & ~7;
+    } else if (value == '\r') {
+        cur_x = 0;
+    } else if (value == '\n') {
+        cur_y++;
+        cur_x = 0;
+    } else {
+        uint16_t word = FB_WORD(value, FB_ATTR(COL_WHITE, COL_BLACK));
+        uint16_t *location = video_buffer + (cur_y*80 + cur_x);
+        *location = word;
+        cur_x++;
+    }
 
-    // TODO: handle special chars here
-
-    word |= value;
-
-    uint16_t *location = (uint16_t*)(video_buffer) + (cur_y*80 + cur_x);
-    *location = word;
-
-    cur_x++;
-    if (cur_x == 80) {
+    if (cur_x >= 80) {
         cur_x = 0;
         cur_y++;
     }
 
-    // TODO: scroll if necessary
+    scroll();
     move_cursor();
 }
 
 void monitor_clear() {
     int i;
-    for (i = 0; i < 80*25; i += 2) {
-        video_buffer[i  ] = ' ';
-        video_buffer[i+1] = 0x0F;
+    uint16_t *vid_mem = video_buffer;
+    for (i = 0; i < 80*25; i++) {
+        vid_mem[i] = BLANK;
     }
     move_cursor();
 }
