@@ -1,11 +1,13 @@
 all:
 	make -C src all
-	scripts/update-image.sh
 
 clean:
 	make -C src clean
 
-run:
+image:
+	scripts/update-image.sh
+
+run: image
 	bochs -f bochs.rc
 
-.PHONY: all clean run
+.PHONY: all clean image run
