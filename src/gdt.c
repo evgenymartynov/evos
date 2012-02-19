@@ -31,7 +31,7 @@ typedef struct {
     uint32_t base;  // Address of the first GDT entry
 } __attribute__((packed)) gdt_ptr_t;
 
-#define BUILD_BUG_UNLESS(x) (sizeof(struct { int _: !!(x); } ));
+#define BUILD_BUG_UNLESS(x) (sizeof(struct { int _: !!(x); } ))
 #define BUILD_BUG_ON_SIZEOF(type, size)                 \
     static int __check_##type __attribute__((unused)) = \
     BUILD_BUG_UNLESS(sizeof(type) == size);

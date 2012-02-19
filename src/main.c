@@ -33,6 +33,6 @@ int kmain(struct multiboot_t *mboot) {
 
     printk("Testing signs\n 123: %d\n4bil: %u\n-123: %d\n", 123, -123, -123);
 
-    monitor_write("Reached the end of kmain()\n");
+    monitor_write("Reached the end of kmain()\n"); 
     return 0x00DEFACED;
 }
