@@ -1,12 +1,17 @@
 #include "monitor.h"
 #include "printk.h"
 #include "gdt.h"
+#include "idt.h"
 
 struct multiboot_t;
 
 int kmain(struct multiboot_t *mboot) {
     monitor_clear();
     init_gdt();
+    init_idt();
+
+    printk("Testing interrupts: ");
+    asm volatile ("int $0x3");
 
     int i;
     for (i = 0; i < 80; i++)
