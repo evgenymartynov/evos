@@ -1,5 +1,6 @@
 #include "gdt.h"
 #include "stdint.h"
+#include "stddef.h"
 #include "printk.h"
 
 typedef struct {
@@ -30,11 +31,6 @@ typedef struct {
     uint16_t limit; // Upper word of addressable-size limit
     uint32_t base;  // Address of the first GDT entry
 } __attribute__((packed)) gdt_ptr_t;
-
-#define BUILD_BUG_UNLESS(x) (sizeof(struct { int _: !!(x); } ))
-#define BUILD_BUG_ON_SIZEOF(type, size)                 \
-    static int __check_##type __attribute__((unused)) = \
-    BUILD_BUG_UNLESS(sizeof(type) == size);
 
 BUILD_BUG_ON_SIZEOF(access_flags_t, 1);
 BUILD_BUG_ON_SIZEOF(granularity_flags_t, 1);
