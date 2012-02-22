@@ -1,6 +1,9 @@
 LDFLAGS=-Tlink.ld
 ASFLAGS=-felf
-CFLAGS=-m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Wall -Werror -I.
+CFLAGS=-m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Wall -Werror -I. 
+
+# Optimise code without breaking it... hopefully
+CFLAGS+=-O3 -fno-optimize-sibling-calls
 
 SOURCES=boot.o main.o ports.o monitor.o printk.o string.o 	\
 		gdt.o gdt_asm.o idt.o idt_asm.o isr.o				\

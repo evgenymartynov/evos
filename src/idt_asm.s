@@ -81,7 +81,8 @@ isr_common_stub:
 
     mov ax, ds
     push eax
-    mov ax, 0x10    ; Data segment descriptor
+
+    mov ax, 0x10    ; Kernel-mode data segment descriptor
     mov ds, ax
     mov es, ax
     mov fs, ax
@@ -96,7 +97,7 @@ isr_common_stub:
     mov gs, ax
 
     popa
-    add esp, 8
+    add esp, 8      ; Interrupt code and error param
     sti
     iret
 

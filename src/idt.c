@@ -235,6 +235,10 @@ void init_idt(void) {
 // Called from assembly
 void isr_common_handler(registers_t regs) {
     printk("Received interrupt %d\n", regs.int_no);
+
+    if (regs.int_no == 13) {
+        printk("General Protection Fault\n");
+    }
 }
 
 // Called from assembly
