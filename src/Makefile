@@ -3,7 +3,8 @@ ASFLAGS=-felf
 CFLAGS=-m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Wall -Werror -I.
 
 SOURCES=boot.o main.o ports.o monitor.o printk.o string.o 	\
-		gdt.o gdt_asm.o idt.o idt_asm.o
+		gdt.o gdt_asm.o idt.o idt_asm.o isr.o				\
+		timer.o
 
 .DEFAULT_GOAL=all
 

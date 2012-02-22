@@ -1,4 +1,7 @@
 #include "idt.h"
+#include "ports.h"
+#include "isr.h"
+
 #include "stdint.h"
 #include "stddef.h"
 #include "printk.h"
@@ -23,13 +26,6 @@ typedef struct {
     uint16_t size;
     uint32_t entries_addr;
 } __attribute__((packed)) idt_ptr_t;
-
-typedef struct {
-    uint32_t ds;
-    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
-    uint32_t int_no, err_code;
-    uint32_t eip, cs, eflags, useresp, ss;
-} __attribute__((packed)) registers_t;
 
 BUILD_BUG_ON_SIZEOF(idt_flags_t, 1);
 BUILD_BUG_ON_SIZEOF(idt_entry_t, 8);
@@ -68,6 +64,8 @@ static void test_idt_structs(void) {
 //
 
 #define IDT_32BIT_INTERRUPT_GATE 0x0E
+#define PIC_MASTER_LOW_INT 32
+#define PIC_SLAVE_LOW_INT 40
 
 idt_entry_t idt_entries[256];
 idt_ptr_t   idt_ptr;
@@ -105,6 +103,22 @@ extern void isr_28(void);
 extern void isr_29(void);
 extern void isr_30(void);
 extern void isr_31(void);
+extern void irq_0(void);
+extern void irq_1(void);
+extern void irq_2(void);
+extern void irq_3(void);
+extern void irq_4(void);
+extern void irq_5(void);
+extern void irq_6(void);
+extern void irq_7(void);
+extern void irq_8(void);
+extern void irq_9(void);
+extern void irq_10(void);
+extern void irq_11(void);
+extern void irq_12(void);
+extern void irq_13(void);
+extern void irq_14(void);
+extern void irq_15(void);
 
 static void idt_load(idt_ptr_t *new_idt) {
     __asm__("lidt %0" :: "m"(*new_idt));
@@ -117,6 +131,25 @@ static void idt_set_handler(idt_entry_t *ent, uint32_t address, uint16_t segment
     ent->segment = segment;
     ent->__reserved = 0;
     ent->flags = flags;
+}
+
+static void remap_pic(void) {
+    // TODO: save masks?
+    // Do not want
+    outb(0x20, 0x11);   // 0x20 is master PIC; 0xA0 is slave PIC
+    outb(0xA0, 0x11);
+
+    outb(0x21, PIC_MASTER_LOW_INT);     // Set the interrupt vector offsets
+    outb(0xA1, PIC_SLAVE_LOW_INT);
+
+    outb(0x21, 0x04);
+    outb(0xA1, 0x02);
+
+    outb(0x21, 0x01);
+    outb(0xA1, 0x01);
+
+    outb(0x21, 0x0);    // Reset masks to 0
+    outb(0xA1, 0x0);
 }
 
 void init_idt(void) {
@@ -170,13 +203,52 @@ void init_idt(void) {
     SET_HANDLER(30, 0x08, flags);
     SET_HANDLER(31, 0x08, flags);
     #undef SET_HANDLER
+    #define SET_IRQ_HANDLER(i, segment, flags)  \
+        idt_set_handler(&idt_entries[32+i], (uint32_t)&irq_##i, segment, flags);
+    SET_IRQ_HANDLER(0,  0x08, flags);
+    SET_IRQ_HANDLER(1,  0x08, flags);
+    SET_IRQ_HANDLER(2,  0x08, flags);
+    SET_IRQ_HANDLER(3,  0x08, flags);
+    SET_IRQ_HANDLER(4,  0x08, flags);
+    SET_IRQ_HANDLER(5,  0x08, flags);
+    SET_IRQ_HANDLER(6,  0x08, flags);
+    SET_IRQ_HANDLER(7,  0x08, flags);
+    SET_IRQ_HANDLER(8,  0x08, flags);
+    SET_IRQ_HANDLER(9,  0x08, flags);
+    SET_IRQ_HANDLER(10, 0x08, flags);
+    SET_IRQ_HANDLER(11, 0x08, flags);
+    SET_IRQ_HANDLER(12, 0x08, flags);
+    SET_IRQ_HANDLER(13, 0x08, flags);
+    SET_IRQ_HANDLER(14, 0x08, flags);
+    SET_IRQ_HANDLER(15, 0x08, flags);
+    #undef SET_IRQ_HANDLER
 
     printk("About to load a new IDT... ");
     idt_load(&idt_ptr);
-    // asm volatile ("sti");
     printk("Loaded\n");
+
+    printk("Remapping the PIC... ");
+    remap_pic();
+    printk("Done\n");
 }
 
+// Called from assembly
 void isr_common_handler(registers_t regs) {
     printk("Received interrupt %d\n", regs.int_no);
+}
+
+// Called from assembly
+void irq_common_handler(registers_t regs) {
+    isr_handler_t handler = interrupt_handlers[regs.int_no];
+    if (handler) {
+        handler(regs);
+    }
+
+    // Notify slave PIC that we are done
+    if (regs.int_no >= PIC_SLAVE_LOW_INT) {
+        outb(0xA0, 0x20);
+    }
+
+    // And the master
+    outb(0x20, 0x20);
 }

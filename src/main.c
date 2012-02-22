@@ -2,6 +2,7 @@
 #include "printk.h"
 #include "gdt.h"
 #include "idt.h"
+#include "timer.h"
 
 struct multiboot_t;
 
@@ -39,6 +40,9 @@ int kmain(struct multiboot_t *mboot) {
     monitor_clear();
     init_gdt();
     init_idt();
+    init_timer(50);
+
+    asm volatile ("sti");
 
     printk("Testing interrupts: ");
     asm volatile ("int $0x3");
