@@ -6,3 +6,16 @@ void memset(void *region, uint8_t value, uint32_t size) {
         *ptr++ = value;
     }
 }
+
+int is_digit(char c) {
+    return c >= '0' && c <= '9';
+}
+
+int strlen(const char *string) {
+    int len = 0;
+    for (; *string; string++) {
+        len++;
+    }
+
+    return len;
+}
