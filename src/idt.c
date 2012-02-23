@@ -224,13 +224,13 @@ void init_idt(void) {
     SET_IRQ_HANDLER(15, 0x08, flags);
     #undef SET_IRQ_HANDLER
 
-    printk("About to load a new IDT... ");
+    printk("Loading a new IDT");
     idt_load(&idt_ptr);
-    printk("Loaded\n");
+    report_success();
 
-    printk("Remapping the PIC... ");
+    printk("Remapping the PIC");
     remap_pic();
-    printk("Done\n");
+    report_success();
 }
 
 static const char *interrupt_name[] = {

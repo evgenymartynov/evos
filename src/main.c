@@ -4,6 +4,7 @@
 #include "idt.h"
 #include "timer.h"
 #include "paging.h"
+#include "panic.h"
 #include "stdint.h"
 #include "multiboot.h"
 
@@ -44,8 +45,14 @@ int kmain(multiboot_info_t *mboot) {
 
     TOTAL_MEMORY_KB = mboot->mem_lower + mboot->mem_upper;
     printk("Lower mem: %d KB, upper mem: %d KB; "
-        "for a total of %d KB\n",
+        "for a total of %d KB",
         mboot->mem_lower, mboot->mem_upper, TOTAL_MEMORY_KB);
+
+    if (TOTAL_MEMORY_KB > 16*1024) {
+        monitor_write_status("okay", 1);
+    } else {
+        panic("Insufficient memory");
+    }
 
     init_gdt();
     init_idt();

@@ -210,3 +210,11 @@ int printk(const char *fmt, ...) {
     va_end(args);
     return num_written;
 }
+
+void report_success(void) {
+    monitor_write_status("DONE", 1);
+}
+
+void report_fail(void) {
+    monitor_write_status("FAIL", 0);
+}

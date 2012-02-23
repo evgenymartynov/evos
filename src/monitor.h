@@ -8,5 +8,6 @@ void monitor_clear();
 void monitor_write(char *str);
 void monitor_write_hex(uint32_t value);
 void monitor_write_dec(uint32_t value);
+void monitor_write_status(const char *str, int success);
 
 #endif

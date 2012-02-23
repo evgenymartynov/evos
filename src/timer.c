@@ -21,9 +21,9 @@ void init_timer(uint32_t freq) {
         divisor = 0xFFFF;
     }
 
-    printk("Initialising timer... ");
+    printk("Initialising timer");
     outb(0x43, 0x36);
     outb(0x40, divisor & 0xFF);
     outb(0x40, (divisor>>8) & 0xFF);
-    printk("Done\n");
+    report_success();
 }

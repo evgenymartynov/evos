@@ -98,7 +98,6 @@ extern void gdt_load(uint32_t);
 static void gdt_set_entry(gdt_entry_t *ent, uint32_t base, uint32_t limit, access_flags_t access_flags, int use_4kib);
 
 void init_gdt(void) {
-    printk("Setting up the GDT\n");
     test_gdt_structs();
 
     gdt_ptr.limit = sizeof(gdt_entry_t)*NUM_GDT_ENTRIES - 1; // yes, -1 is right
@@ -127,9 +126,9 @@ void init_gdt(void) {
     af.is_code = 0;
     gdt_set_entry(&gdt_entries[4], 0, 0xFFFFFFFF, af, 1);
 
-    printk("About to load a new GDT... ");
+    printk("Loading a new GDT");
     gdt_load((uint32_t)&gdt_ptr);
-    printk("Loaded\n");
+    report_success();
 }
 
 static void gdt_set_entry(gdt_entry_t *ent, uint32_t base, uint32_t limit, access_flags_t access_flags, int use_4kib) {

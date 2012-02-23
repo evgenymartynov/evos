@@ -65,10 +65,10 @@ void init_paging(void) {
         alloc_frame(get_page(i, TRUE, kernel_directory), FALSE, FALSE);
     }
 
-    printk("Enabling paging... ");
+    printk("Setting up paging");
     isr_register_handler(PAGE_FAULT_ISR, page_fault_handler);
     switch_page_directory(kernel_directory);
-    printk("Done\n");
+    report_success();
 }
 
 page_t* get_page(uint32_t address, int create_missing, page_directory_t *dir) {

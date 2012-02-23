@@ -1,5 +1,6 @@
 #include "monitor.h"
 #include "stddef.h"
+#include "string.h"
 
 static uint16_t *video_buffer = (uint16_t*)0xb8000;
 static uint16_t cur_x, cur_y;
@@ -10,6 +11,8 @@ static uint16_t cur_x, cur_y;
 #define FB_ATTR(fg, bg) ( ( (uint8_t )(bg) << 4 ) | (uint8_t )(fg) )
 
 static const uint8_t COL_WHITE = 15;
+static const uint8_t COL_RED   = 4;
+static const uint8_t COL_GREEN = 2;
 static const uint8_t COL_BLACK = 0;
 // TODO: define all the colours
 
@@ -39,7 +42,7 @@ static void scroll() {
     }
 }
 
-void monitor_put(char value) {
+static void __monitor_put(char value, uint8_t attributes) {
     if (value == 0x08) {
         // backspace
         if (cur_x) {
@@ -53,7 +56,7 @@ void monitor_put(char value) {
         cur_y++;
         cur_x = 0;
     } else {
-        uint16_t word = FB_WORD(value, FB_ATTR(COL_WHITE, COL_BLACK));
+        uint16_t word = FB_WORD(value, attributes);
         uint16_t *location = video_buffer + (cur_y*80 + cur_x);
         *location = word;
         cur_x++;
@@ -66,6 +69,10 @@ void monitor_put(char value) {
 
     scroll();
     move_cursor();
+}
+
+void monitor_put(char value) {
+    __monitor_put(value, FB_ATTR(COL_WHITE, COL_BLACK));
 }
 
 void monitor_clear() {
@@ -107,4 +114,20 @@ void monitor_write_dec(uint32_t value) {
         monitor_put('0' + digit);
         had_digit = TRUE;
     }
+}
+
+void monitor_write_status(const char *str, int success) {
+    uint8_t attr = success
+                   ? FB_ATTR(COL_GREEN, COL_BLACK)
+                   : FB_ATTR(COL_RED,   COL_BLACK);
+
+    int len = strlen(str) + 2; // for []
+    cur_x = 80 - len;
+
+    monitor_put('[');
+    while (*str) {
+        __monitor_put(*str, attr);
+        str++;
+    }
+    monitor_put(']');
 }
