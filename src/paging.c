@@ -12,6 +12,7 @@ BUILD_BUG_ON_SIZEOF(page_t, 4);
 #define CR0_PG_BIT  0x80000000
 
 extern uint32_t kmalloc_first_unused;
+extern uint32_t TOTAL_MEMORY_KB;
 
 static Bitset   frames; // TODO allocate
 static uint32_t num_frames;
@@ -48,7 +49,7 @@ static void free_frame(page_t *page) {
 #endif
 
 void init_paging(void) {
-    uint32_t memory_end = 0x1000 * 0x1000 * 0x10; // 16 MB
+    uint32_t memory_end = TOTAL_MEMORY_KB * 1024;
 
     num_frames = memory_end / PAGE_SIZE;
     frames = (Bitset)kmalloc(sizeof(bitset_t));

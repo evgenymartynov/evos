@@ -4,8 +4,8 @@
 #include "idt.h"
 #include "timer.h"
 #include "paging.h"
-
-struct multiboot_t;
+#include "stdint.h"
+#include "multiboot.h"
 
 static void __attribute__((unused)) test_screen(void) {
     int i;
@@ -37,8 +37,16 @@ static void __attribute__((unused)) test_screen(void) {
     printk("%s %5s %-10s %10s\n", s, s, s, s, s);
 }
 
-int kmain(struct multiboot_t *mboot) {
+uint32_t TOTAL_MEMORY_KB;
+
+int kmain(multiboot_info_t *mboot) {
     monitor_clear();
+
+    TOTAL_MEMORY_KB = mboot->mem_lower + mboot->mem_upper;
+    printk("Lower mem: %d KB, upper mem: %d KB; "
+        "for a total of %d KB\n",
+        mboot->mem_lower, mboot->mem_upper, TOTAL_MEMORY_KB);
+
     init_gdt();
     init_idt();
     init_paging();
