@@ -232,13 +232,37 @@ void init_idt(void) {
     printk("Done\n");
 }
 
+static const char *interrupt_name[] = {
+    [0] = "Division by zero",
+    [1] = "Single-step/debug exception",
+    [2] = "Non-maskable interrupt",
+    [3] = "Breakpoint",
+    [4] = "Detected overflow (INTO)",
+    [5] = "Bounds check failed (BOUND)",
+    [6] = "Invalid opcode",
+    [7] = "Coprocessor not available",
+    [8] = "Double fault",
+    [9] = "Coprocessor segment overrun",
+    [10] = "Invalid TSS",
+    [11] = "Segment not present",
+    [12] = "Stack fault",
+    [13] = "General protection fault",
+    [14] = "Page fault",
+    [15] = "(reserved)",
+    [16] = "Coprocessor fault",
+    [17] = "Alignment check exception",
+    [18] = "Machine check exception",
+    0
+};
+
+static const char *default_interrupt_name = "unknown";
+
 // Called from assembly
 void isr_common_handler(registers_t regs) {
-    printk("Received interrupt %d\n", regs.int_no);
+    const char *name = interrupt_name[regs.int_no];
+    if (!name) name = default_interrupt_name;
 
-    if (regs.int_no == 13) {
-        printk("General Protection Fault\n");
-    }
+    printk("Received interrupt %d: %s\n", regs.int_no, name);
 }
 
 // Called from assembly
