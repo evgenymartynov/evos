@@ -3,6 +3,7 @@
 #include "gdt.h"
 #include "idt.h"
 #include "timer.h"
+#include "paging.h"
 
 struct multiboot_t;
 
@@ -40,6 +41,7 @@ int kmain(struct multiboot_t *mboot) {
     monitor_clear();
     init_gdt();
     init_idt();
+    init_paging();
     init_timer(50);
 
     asm volatile ("sti");
