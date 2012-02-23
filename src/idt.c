@@ -1,6 +1,7 @@
 #include "idt.h"
 #include "ports.h"
 #include "isr.h"
+#include "panic.h"
 
 #include "stdint.h"
 #include "stddef.h"
@@ -259,10 +260,18 @@ static const char *default_interrupt_name = "unknown";
 
 // Called from assembly
 void isr_common_handler(registers_t regs) {
-    const char *name = interrupt_name[regs.int_no];
-    if (!name) name = default_interrupt_name;
+    isr_handler_t handler = interrupt_handlers[regs.int_no];
+    if (handler) {
+        handler(regs);
+    } else {
+        const char *name = interrupt_name[regs.int_no];
+        if (!name) name = default_interrupt_name;
+        printk("Received interrupt %d: %s\n", regs.int_no, name);
+    }
 
-    printk("Received interrupt %d: %s\n", regs.int_no, name);
+    if (regs.int_no == 13) {
+        panic("General protection fault :(");
+    }
 }
 
 // Called from assembly
