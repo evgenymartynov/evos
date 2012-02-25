@@ -8,7 +8,6 @@
 #include "stdint.h"
 #include "multiboot.h"
 #include "mem.h"
-
 #include "kmalloc.h"
 
 static void __attribute__((unused)) test_screen(void) {
