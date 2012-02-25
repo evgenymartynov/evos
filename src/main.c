@@ -9,6 +9,8 @@
 #include "multiboot.h"
 #include "mem.h"
 
+#include "kmalloc.h"
+
 static void __attribute__((unused)) test_screen(void) {
     int i;
     for (i = 0; i < 80; i++)
@@ -39,10 +41,34 @@ static void __attribute__((unused)) test_screen(void) {
     printk("%s %5s %-10s %10s\n", s, s, s, s, s);
 }
 
+// This is the entry point from boot.s
+// We need to change the stack ASAP
+// Interrupts are disabled at this point in time
 int kmain(multiboot_info_t *mboot) {
     monitor_clear();
-
     init_mem(mboot);
+
+    // Switch to a different stack. GRUB leaves us in an undefined state.
+    #define STACK_SZ 0x1000 // 4k should be enough for everybody
+    char *new_stack = (char*)kmalloc_a(STACK_SZ) + STACK_SZ;
+    char *old_stack = 0;
+    asm volatile (
+        "movl %%esp, %0 \n"
+        "movl %1, %%esp \n"
+        "call __kmain   \n"
+        "movl %0, %%esp \n"
+        : "=m"(old_stack)
+        : "m"(new_stack)
+    );
+    #undef STACK_SZ
+
+    monitor_write("Reached the end of kmain()\n");
+    return 0x00DEFACED;
+}
+
+// This is a continuation of kmain(...), with a new stack
+// Interrupts are still disabled here.
+void __kmain(void) {
     init_gdt();
     init_idt();
     init_paging();
@@ -54,7 +80,4 @@ int kmain(multiboot_info_t *mboot) {
     asm volatile ("int $0x3");
 
     // test_screen();
-
-    monitor_write("Reached the end of kmain()\n"); 
-    return 0x00DEFACED;
 }
