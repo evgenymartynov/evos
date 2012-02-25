@@ -8,7 +8,7 @@
 #define IRQ_0 32
 
 static void timer_callback(registers_t regs) {
-    printk("tick ");
+    // printk("tick ");
 }
 
 void init_timer(uint32_t freq) {
