@@ -54,7 +54,8 @@ static char* append_number(char *str, unsigned int value, int radix, int flags, 
         *buf++ = digits[digit];
 
         i /= radix;
-    } while (i != 0);
+        width--;
+    } while (i != 0 || (!(flags & LEFT_ALIGN) && width > 0));
 
     if (flags & SHOW_PREFIX) {
         if (radix == 2) {
@@ -71,8 +72,6 @@ static char* append_number(char *str, unsigned int value, int radix, int flags, 
     if (sign) {
         *buf++ = sign;
     }
-
-    width -= (buf-_buf);
 
     if (!(flags & LEFT_ALIGN)) {
         for (; width > 0; width--) {
