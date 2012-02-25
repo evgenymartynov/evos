@@ -15,12 +15,12 @@ void init_mem(multiboot_info_t *mboot) {
     }
 
     printk("Reading multiboot memory map...\n");
-    printk("    %-18s | %-18s | %-4s\n"
-        "    -------------------+--------------------+-----\n",
-        "   Base address",
-        "   Region length",
-        "Type"
-    );
+    // printk("    %-18s | %-18s | %-4s\n"
+    //     "    -------------------+--------------------+-----\n",
+    //     "   Base address",
+    //     "   Region length",
+    //     "Type"
+    // );
 
     uint32_t base_addr = 0, region_len = 0;
     mem_total_bytes = 0;
@@ -31,13 +31,13 @@ void init_mem(multiboot_info_t *mboot) {
         mmap = (multiboot_memory_map_t*) \
             ((uint32_t)mmap + mmap->size + sizeof(mmap->size))
     ) {
-        printk("    %#08x%08x | %#08x%08x | %s\n",
-            (uint32_t)(mmap->addr >> 32),
-            (uint32_t)(mmap->addr & 0xFFFFFFFF),
-            (uint32_t)(mmap->len >> 32),
-            (uint32_t)(mmap->len & 0xFFFFFFFF),
-            (mmap->type == 1) ? "free" : "used"
-        );
+        // printk("    %#08x%08x | %#08x%08x | %s\n",
+        //     (uint32_t)(mmap->addr >> 32),
+        //     (uint32_t)(mmap->addr & 0xFFFFFFFF),
+        //     (uint32_t)(mmap->len >> 32),
+        //     (uint32_t)(mmap->len & 0xFFFFFFFF),
+        //     (mmap->type == 1) ? "free" : "used"
+        // );
 
         // Check that the span fits in 32 bits
         if (mmap->addr >> 32 || (mmap->addr + mmap->len - 1) >> 32) {
@@ -68,7 +68,7 @@ void init_mem(multiboot_info_t *mboot) {
         }
     }
 
-    printk("Using chunk at %#08x of size %d KB", base_addr, region_len/1024);
+    printk("  Found free memory at %#08x; size %d KB", base_addr, region_len/1024);
     mem_first_unused = base_addr;
 
     if (region_len > 16*1024*1024) {
