@@ -7,6 +7,7 @@
 #include "panic.h"
 #include "stdint.h"
 #include "multiboot.h"
+#include "mem.h"
 
 static void __attribute__((unused)) test_screen(void) {
     int i;
@@ -38,22 +39,10 @@ static void __attribute__((unused)) test_screen(void) {
     printk("%s %5s %-10s %10s\n", s, s, s, s, s);
 }
 
-uint32_t TOTAL_MEMORY_KB;
-
 int kmain(multiboot_info_t *mboot) {
     monitor_clear();
 
-    TOTAL_MEMORY_KB = mboot->mem_lower + mboot->mem_upper;
-    printk("Lower mem: %d KB, upper mem: %d KB; "
-        "for a total of %d KB",
-        mboot->mem_lower, mboot->mem_upper, TOTAL_MEMORY_KB);
-
-    if (TOTAL_MEMORY_KB > 16*1024) {
-        monitor_write_status("okay", 1);
-    } else {
-        panic("Insufficient memory");
-    }
-
+    init_mem(mboot);
     init_gdt();
     init_idt();
     init_paging();

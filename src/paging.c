@@ -5,14 +5,12 @@
 #include "kmalloc.h"
 #include "string.h"
 #include "printk.h"
+#include "mem.h"
 
 BUILD_BUG_ON_SIZEOF(page_t, 4);
 
 #define PAGE_SIZE   4096    // TODO: defined in 2 places
 #define CR0_PG_BIT  0x80000000
-
-extern uint32_t kmalloc_first_unused;
-extern uint32_t TOTAL_MEMORY_KB;
 
 static Bitset   frames; // TODO allocate
 static uint32_t num_frames;
@@ -49,7 +47,7 @@ static void free_frame(page_t *page) {
 #endif
 
 void init_paging(void) {
-    uint32_t memory_end = TOTAL_MEMORY_KB * 1024;
+    uint32_t memory_end = mem_total_bytes;
 
     num_frames = memory_end / PAGE_SIZE;
     frames = (Bitset)kmalloc(sizeof(bitset_t));
@@ -61,7 +59,7 @@ void init_paging(void) {
 
     // Identity mapping!
     uint32_t i;
-    for (i = 0; i < kmalloc_first_unused; i += PAGE_SIZE) {
+    for (i = 0; i < mem_first_unused; i += PAGE_SIZE) {
         alloc_frame(get_page(i, TRUE, kernel_directory), FALSE, FALSE);
     }
 
