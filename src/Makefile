@@ -10,14 +10,13 @@ SOURCES=boot.o main.o ports.o monitor.o printk.o string.o 	\
 		timer.o bitset.o kmalloc.o paging.o mem.o
 
 .DEFAULT_GOAL=all
+.PHONY=all clean
 
-all: $(SOURCES) link
+all: $(SOURCES)
+	ld $(LDFLAGS) -o ../bin/kernel $(SOURCES)
 
 clean:
 	-rm *.o ../bin/kernel
-
-link:
-	ld $(LDFLAGS) -o ../bin/kernel $(SOURCES)
 
 .s.o:
 	nasm $(ASFLAGS) $<
