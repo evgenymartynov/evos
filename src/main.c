@@ -45,6 +45,7 @@ static void __attribute__((unused)) test_screen(void) {
 // Interrupts are disabled at this point in time
 int kmain(multiboot_info_t *mboot) {
     monitor_clear();
+    init_panic_backtrace(mboot);
     init_mem(mboot);
 
     // Switch to a different stack. GRUB leaves us in an undefined state.

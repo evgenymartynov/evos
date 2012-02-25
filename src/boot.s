@@ -28,6 +28,7 @@ mboot:
 
 start:
     push ebx    ; param to kmain
+    mov ebp, 0
     cli
     call kmain
 
