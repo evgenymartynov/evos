@@ -40,6 +40,14 @@ static void __attribute__((unused)) test_screen(void) {
     printk("%s %5s %-10s %10s\n", s, s, s, s, s);
 }
 
+static void __attribute__((unused)) test_kmalloc(void) {
+    uint32_t a = kmalloc(4);
+    uint32_t b = kmalloc(4);
+    uint32_t c = kmalloc(4);
+
+    printk("%#08x %#08x %#08x\n", a, b, c);
+}
+
 // This is the entry point from boot.s
 // We need to change the stack ASAP
 // Interrupts are disabled at this point in time
@@ -80,4 +88,5 @@ void __kmain(void) {
     asm volatile ("int $0x3");
 
     // test_screen();
+    test_kmalloc();
 }

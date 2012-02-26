@@ -7,7 +7,9 @@ CFLAGS+=-O3 -fno-optimize-sibling-calls
 
 SOURCES=boot.o main.o ports.o monitor.o printk.o string.o 	\
 		gdt.o gdt_asm.o idt.o idt_asm.o isr.o panic.o 		\
-		timer.o bitset.o kmalloc.o paging.o mem.o
+		timer.o kmalloc.o paging.o mem.o kheap.o
+
+SOURCES += bitset.o ordered_array.o
 
 .DEFAULT_GOAL=all
 .PHONY=all clean

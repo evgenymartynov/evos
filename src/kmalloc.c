@@ -1,11 +1,9 @@
 #include "kmalloc.h"
 #include "mem.h"
 #include "stdint.h"
+#include "kheap.h"
 
-#define PAGE_SIZE       4096        // TODO: defined in 2 places
-#define PAGE_ADDR_MASK  0xFFFFF000  // Upper bits of page-aligned addresses
-
-static uint32_t __kmalloc(uint32_t size, int align, uint32_t *physical) {
+static uint32_t __linear_kmalloc(uint32_t size, int align, uint32_t *physical) {
     if (align && (mem_first_unused & ~PAGE_ADDR_MASK)) {
         mem_first_unused &= PAGE_ADDR_MASK;
         mem_first_unused += PAGE_SIZE;
@@ -19,6 +17,14 @@ static uint32_t __kmalloc(uint32_t size, int align, uint32_t *physical) {
     }
 
     return res;
+}
+
+static uint32_t __kmalloc(uint32_t size, int align, uint32_t *physical) {
+    if (kernel_heap) {
+        return (uint32_t)heap_alloc(kernel_heap, size, align);
+    } else  {
+        return __linear_kmalloc(size, align, physical);
+    }
 }
 
 // Plain kmalloc
