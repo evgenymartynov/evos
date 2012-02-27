@@ -41,11 +41,30 @@ static void __attribute__((unused)) test_screen(void) {
 }
 
 static void __attribute__((unused)) test_kmalloc(void) {
+    printk("Testing heap allocation and freeing");
+
     uint32_t a = kmalloc(4);
     uint32_t b = kmalloc(4);
     uint32_t c = kmalloc(4);
+    uint32_t first_alloc = a;
 
-    printk("%#08x %#08x %#08x\n", a, b, c);
+    kfree((void*)c); c = 0;
+    c = kmalloc(16);
+
+    kfree((void*)a); a = 0;
+    kfree((void*)b); b = 0;
+    a = kmalloc(8);
+
+    kfree((void*)a); a = 0;
+    kfree((void*)b); b = 0;
+    kfree((void*)c); c = 0;
+
+    a = kmalloc(4096);
+    if (a != first_alloc) {
+        report_fail();
+    } else {
+        report_success();
+    }
 }
 
 // This is the entry point from boot.s

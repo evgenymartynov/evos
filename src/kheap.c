@@ -272,3 +272,73 @@ void* heap_alloc(heap_t *heap, uint32_t __size, int page_align) {
 
     return (void*)((uint32_t)block_header + sizeof(*block_header));
 }
+
+void heap_free(heap_t *heap, void *ptr) {
+    // No operation must be performed on null pointers
+    if (!ptr) {
+        return;
+    }
+
+    header_t *header = (header_t*)ptr - 1;
+    footer_t *footer = (footer_t*)((uint32_t)header + header->size) - 1;
+    assert(header->magic == KHEAP_MAGIC, "header magic does not match");
+    assert(footer->magic == KHEAP_MAGIC, "footer magic does not match");
+
+    // Free it
+    header->is_hole = TRUE;
+
+    // Do we add this into the index?
+    int do_add = TRUE;
+
+    // Merge left?
+    footer_t *left_footer = (footer_t*)header - 1;
+    if ((uint32_t)left_footer > heap->allocated_start &&
+        left_footer->magic == KHEAP_MAGIC && left_footer->header->is_hole) {
+        // Prevent derps
+        assert(left_footer->header->magic == KHEAP_MAGIC,
+            "left header magic does not match");
+        // Point our footer to the left header
+        footer->header = left_footer->header;
+        // Change left header's size
+        left_footer->header->size += header->size;
+        // Update our header
+        header = left_footer->header;
+
+        // And don't add our blob to the index
+        do_add = FALSE;
+        // And propagate the size-change into the index
+        ordered_array_changed_element(&heap->index);
+    }
+
+    // Merge right?
+    header_t *right_header = (header_t*)((uint32_t)header + header->size);
+    if ((uint32_t)right_header < heap->allocated_end &&
+        right_header->magic == KHEAP_MAGIC && right_header->is_hole) {
+        // Extend ours to the right
+        header->size += right_header->size;
+        // Fix up right footer
+        footer = (footer_t*)((uint32_t)header + header->size) - 1;
+        assert(footer->magic == KHEAP_MAGIC,
+            "right footer magic does not match");
+        footer->header = header;
+
+        // Find the right hole in the index
+        int i;
+        for (i = 0; i < heap->index.size; i++) {
+            if (ordered_array_index(&heap->index, i) == right_header) {
+                break;
+            }
+        }
+        assert(i != heap->index.size, "Cannot find right hole in index");
+
+        // And remove it
+        ordered_array_remove(&heap->index, i);
+    }
+
+    // TODO: heap contraction
+
+    // If we need to add this hole to index, do so now
+    if (do_add) {
+        ordered_array_insert(&heap->index, header);
+    }
+}

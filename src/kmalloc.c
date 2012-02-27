@@ -46,3 +46,10 @@ uint32_t kmalloc_p(uint32_t size, uint32_t *physical) {
 uint32_t kmalloc_ap(uint32_t size, uint32_t *physical) {
     return __kmalloc(size, 1, physical);
 }
+
+// Free previously-kmalloc-ed memory
+void kfree(void *ptr) {
+    if (kernel_heap) {
+        heap_free(kernel_heap, ptr);
+    }
+}
