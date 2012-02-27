@@ -34,13 +34,7 @@ void ordered_array_insert(ordered_array_t *this, type_t value) {
     }
 
     this->array[this->size++] = value;
-    int i = this->size-1;
-    while (i > 0 && this->comparator(this->array[i], this->array[i-1])) {
-        type_t temp = this->array[i];
-        this->array[i] = this->array[i-1];
-        this->array[i-1] = temp;
-        i--;
-    }
+    ordered_array_changed_element(this);
 }
 
 void ordered_array_remove(ordered_array_t *this, uint32_t index) {
@@ -61,4 +55,16 @@ type_t ordered_array_index(ordered_array_t *this, uint32_t index) {
     }
 
     return this->array[index];
+}
+
+// One element was changed and the sequence needs updating
+void ordered_array_changed_element(ordered_array_t *this) {
+    int i;
+    for (i = this->size-1; i > 0; i--) {
+        if (this->comparator(this->array[i], this->array[i-1])) {
+            type_t temp = this->array[i];
+            this->array[i] = this->array[i-1];
+            this->array[i-1] = temp;
+        }
+    }
 }
