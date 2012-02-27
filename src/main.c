@@ -74,9 +74,12 @@ int kmain(multiboot_info_t *mboot) {
     monitor_clear();
     init_panic_backtrace(mboot);
     init_mem(mboot);
+    init_gdt();
+    init_idt();
+    init_paging(); // Also enables kernel heap
 
     // Switch to a different stack. GRUB leaves us in an undefined state.
-    #define STACK_SZ 0x1000 // 4k should be enough for everybody
+    #define STACK_SZ 0x100000
     char *new_stack = (char*)kmalloc_a(STACK_SZ) + STACK_SZ;
     char *old_stack = 0;
     asm volatile (
@@ -96,9 +99,6 @@ int kmain(multiboot_info_t *mboot) {
 // This is a continuation of kmain(...), with a new stack
 // Interrupts are still disabled here.
 void __kmain(void) {
-    init_gdt();
-    init_idt();
-    init_paging();
     init_timer(50);
 
     asm volatile ("sti");
