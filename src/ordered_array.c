@@ -35,7 +35,7 @@ void ordered_array_insert(ordered_array_t *this, type_t value) {
 
     this->array[this->size++] = value;
     int i = this->size-1;
-    while (i > 0 && this->comparator(this->array[i], this->array[i]-1)) {
+    while (i > 0 && this->comparator(this->array[i], this->array[i-1])) {
         type_t temp = this->array[i];
         this->array[i] = this->array[i-1];
         this->array[i-1] = temp;
