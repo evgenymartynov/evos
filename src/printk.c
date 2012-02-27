@@ -148,6 +148,9 @@ static int vsprintf(const char *fmt, char *buf, va_list args) {
                 str = append_number(str, va_arg(args, int), 10, flags, width);
                 break;
 
+            case 'p':
+                flags |= ZERO_PADDED | SHOW_PREFIX;
+                if (!width) width = 8;
             case 'x':
                 str = append_number(str, va_arg(args, int), 16, flags, width);
                 break;
