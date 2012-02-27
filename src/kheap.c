@@ -169,7 +169,8 @@ void* heap_alloc(heap_t *heap, uint32_t __size, int page_align) {
         uint32_t old_allocated_end = heap->allocated_end;
 
         // Expand the heap. This will automagically page-align.
-        expand(heap, old_length + new_size);
+        //   +PAGE_SIZE to fix yet another page-aligning bug
+        expand(heap, old_length + new_size + PAGE_SIZE);
         uint32_t new_length = heap->allocated_end - heap->allocated_start;
 
         // Create the hole that we just allocated
