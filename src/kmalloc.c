@@ -1,7 +1,9 @@
 #include "kmalloc.h"
 #include "mem.h"
 #include "stdint.h"
+#include "stddef.h"
 #include "kheap.h"
+#include "paging.h"
 
 static uint32_t __linear_kmalloc(uint32_t size, int align, uint32_t *physical) {
     if (align && (mem_first_unused & ~PAGE_ADDR_MASK)) {
@@ -21,7 +23,26 @@ static uint32_t __linear_kmalloc(uint32_t size, int align, uint32_t *physical) {
 
 static uint32_t __kmalloc(uint32_t size, int align, uint32_t *physical) {
     if (kernel_heap) {
-        return (uint32_t)heap_alloc(kernel_heap, size, align);
+        extern page_directory_t *kernel_directory;
+        uint32_t new = (uint32_t)heap_alloc(kernel_heap, size, align);
+        // TODO: this is utterly broken for *physical.
+        // If the allocation does not span across consecutive regions,
+        // the physical address will be only valid for the allocations
+        // in the first page.
+        // So like, ditch this shitty heap implementation and go for something
+        // that allows contiguous chunks of the same physical memory to be used
+        // This will probably require a double-layer memory architecture:
+        //   1) Low-level frame-allocating interface with support for
+        //      contiguous memory regions
+        //   2) Higher-level heap-allocating interface which supports proper
+        //      aligning and correct contiguous regions with physical addresses
+        if (physical) {
+            page_t *page = get_page(new, FALSE, kernel_directory);
+            *physical = page->address * PAGE_SIZE +
+                ((uint32_t)new & ~PAGE_ADDR_MASK);
+        }
+
+        return new;
     } else  {
         return __linear_kmalloc(size, align, physical);
     }

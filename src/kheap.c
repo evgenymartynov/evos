@@ -203,7 +203,7 @@ void* heap_alloc(heap_t *heap, uint32_t __size, int page_align) {
     }
 
     // If we are told to page align, make a hole in front of the block
-    if (page_align && (orig_hole_addr & ~PAGE_ADDR_MASK)) {
+    if (page_align && ((orig_hole_addr + sizeof(header_t)) & ~PAGE_ADDR_MASK)) {
         uint32_t offset = page_align_get_offset(orig_hole_addr);
         uint32_t new_addr = orig_hole_addr + offset;
 

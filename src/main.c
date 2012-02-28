@@ -59,7 +59,7 @@ static void __attribute__((unused)) test_kmalloc(void) {
     kfree((void*)b); b = 0;
     kfree((void*)c); c = 0;
 
-    a = kmalloc(4096);
+    a = kmalloc(32);
     if (a != first_alloc) {
         report_fail();
     } else {
