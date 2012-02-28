@@ -69,7 +69,7 @@ void init_paging(void) {
 
     // Now map the heap
     for (i = KHEAP_START; i < KHEAP_START+KHEAP_INITIAL_SIZE; i += PAGE_SIZE) {
-        alloc_frame(get_page(i, FALSE, kernel_directory), FALSE, TRUE);
+        alloc_frame(get_page(i, FALSE, kernel_directory), FALSE, FALSE);
     }
 
     printk("Setting up paging");
