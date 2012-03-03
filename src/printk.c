@@ -163,6 +163,10 @@ static int vsprintf(const char *fmt, char *buf, va_list args) {
                 str = append_number(str, va_arg(args, int), 2, flags, width);
                 break;
 
+            case 'c':
+                *str++ = (char)va_arg(args, int);
+                break;
+
             case 's':
                 {
                     char *param = va_arg(args, char*);
