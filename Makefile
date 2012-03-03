@@ -10,5 +10,8 @@ image:
 run: image
 	bochs -f bochs.rc
 
+runq: image
+	qemu -fda floppy.img
+
 .PHONY: all clean image run
 .DEFAULT_GOAL=all
