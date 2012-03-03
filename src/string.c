@@ -7,6 +7,13 @@ void memset(void *region, uint8_t value, uint32_t size) {
     }
 }
 
+void memcpy(void *_dest, void *_src, uint32_t num) {
+    char *dest = _dest, *src = _src;
+    while (num--) {
+        *dest++ = *src++;
+    }
+}
+
 int is_digit(char c) {
     return c >= '0' && c <= '9';
 }
