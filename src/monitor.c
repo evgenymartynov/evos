@@ -19,6 +19,7 @@ static const uint8_t COL_BLACK = 0;
 static const uint16_t BLANK = FB_WORD(' ', FB_ATTR(15, 0));
 
 static void move_cursor() {
+    return;
     uint16_t position = 80*cur_y + cur_x;
     outb(0x3D4, 14);
     outb(0x3D5, position >> 8);

@@ -31,8 +31,8 @@ void alloc_frame(page_t *page, int kernel_mode, int writeable) {
     bitset_set(frames, frame);
 
     page->present = TRUE;
-    page->writeable = writeable ? TRUE : FALSE;
-    page->user_mode = kernel_mode ? FALSE : TRUE;
+    page->writeable = TRUE; /* TODO */ //writeable ? TRUE : FALSE;
+    page->user_mode = TRUE; /* TODO */ //kernel_mode ? FALSE : TRUE;
     page->address = frame;   // Note that this is the top 20 bits
 }
 
@@ -133,6 +133,7 @@ void page_fault_handler(registers_t regs) {
     );
     if (reserved) printk("Also trampled reserved bits\n");
     if (op_fetch) printk("Error occurred during op-fetch\n");
+    printk("At eip=%p\n", regs.eip);
 
     panic("Page fault!");
 }

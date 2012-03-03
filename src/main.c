@@ -67,6 +67,8 @@ static void __attribute__((unused)) test_kmalloc(void) {
     }
 }
 
+char *new_stack;
+
 // This is the entry point from boot.s
 // We need to change the stack ASAP
 // Interrupts are disabled at this point in time
@@ -80,7 +82,8 @@ int kmain(multiboot_info_t *mboot) {
 
     // Switch to a different stack. GRUB leaves us in an undefined state.
     #define STACK_SZ 0x100000
-    char *new_stack = (char*)kmalloc_a(STACK_SZ) + STACK_SZ;
+    new_stack = (char*)kmalloc_a(STACK_SZ) + STACK_SZ;
+    printk("moving stack to %p\n", new_stack);
     char *old_stack = 0;
     asm volatile (
         "movl %%esp, %0 \n"
@@ -96,6 +99,32 @@ int kmain(multiboot_info_t *mboot) {
     return 0x00DEFACED;
 }
 
+void umode(void) {
+    printk("User-mode!\n");
+    for(;;);
+}
+
+void jump_usermode(void) {
+    asm volatile(
+        "movw $0x23, %%ax;"
+        "movw %%ax, %%ds;"
+        "movw %%ax, %%es;"
+        "movw %%ax, %%fs;"
+        "movw %%ax, %%gs;"
+
+        "cli;"
+
+        "movl %%esp, %%eax;"
+        "pushl $0x23;"
+        "pushl %%eax;"
+        "pushf;"
+        "pushl $0x1b;"
+        "pushl $umode;"
+        "iret;"
+        : : : "eax"
+    );
+}
+
 // This is a continuation of kmain(...), with a new stack
 // Interrupts are still disabled here.
 void __kmain(void) {
@@ -108,4 +137,6 @@ void __kmain(void) {
 
     // test_screen();
     test_kmalloc();
+
+    jump_usermode();
 }
