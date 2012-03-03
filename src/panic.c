@@ -2,6 +2,7 @@
 #include "printk.h"
 #include "stdint.h"
 #include "string.h"
+#include "kmalloc.h"
 
 typedef struct {
     uint32_t name;
@@ -29,7 +30,7 @@ typedef struct {
 #define ELF_SYMBOL_FUNCTION     2
 
 static elf_symbol_t *symbols;
-static const char *strtab;
+static char *strtab;
 static uint32_t num_symbols   = 0;
 static uint32_t strtab_length = 0;
 
@@ -51,8 +52,10 @@ void init_panic_backtrace(multiboot_info_t *mboot) {
         const char *name = (const char *)(shstrtab + sh[i].name);
 
         if (strcmp(name, ".strtab") == 0) {
-            strtab = (const char*)sh[i].addr;
             strtab_length = sh[i].size;
+
+            strtab = (char*)kmalloc(strtab_length + 8);
+            memcpy(strtab, (char*)sh[i].addr, strtab_length);
         }
 
         if (strcmp(name, ".symtab") == 0) {
@@ -93,11 +96,18 @@ static void print_stack_trace(void) {
 }
 
 void __panic(const char *file, const char *func, int line, const char *msg) {
-    printk("\n\rKernel panic. Stack trace:\n");
-    print_stack_trace();
+    static int panicked_before = 0;
+    if (panicked_before) {
+        printk("Double-panic. Flip the switch to `more magic' and try again");
+    } else {
+        panicked_before = 1;
 
-    printk("'%s' in file %s:%d: ", func, file, line);
-    printk(msg);
+        printk("\n\rKernel panic\n'%s' in file %s:%d: %s\n",
+            func, file, line, msg);
+
+        printk("Stack trace:\n");
+        print_stack_trace();
+    }
 
     asm volatile ("cli; hlt");
     for(;;);
