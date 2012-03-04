@@ -68,49 +68,6 @@ BUILD_BUG_ON_SIZEOF(granularity_flags_t, 1);
 BUILD_BUG_ON_SIZEOF(gdt_entry_t, 8);
 BUILD_BUG_ON_SIZEOF(gdt_ptr_t, 6);
 
-// This is ugly.
-static void test_gdt_structs(void) {
-    #define __cast(type, value) (*(type*) &value)
-    #define check(type, af, value) (__cast(type, af) == (value))
-    #define test(blob, value) if (!check(uint8_t, blob, value)) {             \
-            printk("In %s: FAILED test on %s\n", __FILE__, #blob);            \
-            printk("\tGot %o, expected %o\n", __cast(uint8_t, blob), value);  \
-        }
-
-    access_flags_t af;
-        af.segment_params = 0;
-        af.is_code = 0;
-        af.__reserved = 1; // MUST be 1
-        af.ring = 0;
-        af.present = 0;
-    test(af, 0020);
-        af.segment_params = 5;
-    test(af, 0025);
-        af.is_code = 1;
-    test(af, 0035);
-        af.ring = 3;
-    test(af, 0175);
-        af.present = 1;
-    test(af, 0375);
-
-    granularity_flags_t gf;
-        gf.limit_high = 0;
-        gf.__reserved = 0;
-        gf.operand_size = 0;
-        gf.granularity = 0;
-    test(gf, 0000);
-        gf.limit_high = 13;
-    test(gf, 0015);
-        gf.operand_size = 1;
-    test(gf, 0115);
-        gf.granularity = 1;
-    test(gf, 0315);
-
-    #undef test
-    #undef check
-    #undef __cast
-}
-
 //
 // Actual GDT stuffs
 //
@@ -131,8 +88,6 @@ static void gdt_set_entry(gdt_entry_t *ent, uint32_t base, uint32_t limit, acces
 static void write_tss(gdt_entry_t *ent);
 
 void init_gdt(void) {
-    test_gdt_structs();
-
     gdt_ptr.limit = sizeof(gdt_entry_t)*NUM_GDT_ENTRIES - 1; // yes, -1 is right
     gdt_ptr.base  = (uint32_t)&gdt_entries;
 
