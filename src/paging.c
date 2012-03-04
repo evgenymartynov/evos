@@ -31,7 +31,7 @@ void alloc_frame(page_t *page, int kernel_mode, int writeable) {
     bitset_set(frames, frame);
 
     page->present = TRUE;
-    page->writeable = TRUE; /* TODO */ //writeable ? TRUE : FALSE;
+    page->writeable = writeable ? TRUE : FALSE;
     page->user_mode = TRUE; /* TODO */ //kernel_mode ? FALSE : TRUE;
     page->address = frame;   // Note that this is the top 20 bits
 }
@@ -78,7 +78,7 @@ void init_paging(void) {
     report_success();
 
     printk("Setting up the heap");
-    kernel_heap = heap_create(KHEAP_START, \
+    kernel_heap = heap_create(KHEAP_START,
         KHEAP_START+KHEAP_INITIAL_SIZE, KHEAP_MAX_ADDRESS, FALSE, TRUE);
     report_success();
 }
