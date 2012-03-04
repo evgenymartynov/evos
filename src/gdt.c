@@ -157,12 +157,9 @@ static void write_tss(gdt_entry_t *ent) {
 
     memset(&tss, 0, sizeof(tss));
     tss.ss0 = 0x10;
-    // WHY DOES THIS WORK!?!?!?!
     tss.esp0 = (uint32_t)kernel_relocated_stack;   // TODO: per-task ESP0
     tss.cs = 0x08 | 3; // can switch to it from ring 3
     tss.ss = tss.ds = tss.es = tss.fs = tss.gs = 0x10 | 3;
-
-    printk("Installed tss.esp0: %p\n", tss.esp0);
 }
 
 static void gdt_set_entry(gdt_entry_t *ent, uint32_t base, uint32_t limit, access_flags_t access_flags, int use_4kib) {
