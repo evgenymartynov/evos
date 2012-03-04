@@ -4,6 +4,7 @@
 #include "stddef.h"
 #include "kheap.h"
 #include "paging.h"
+#include "printk.h"
 
 static uint32_t __linear_kmalloc(uint32_t size, int align, uint32_t *physical) {
     if (align && (mem_first_unused & ~PAGE_ADDR_MASK)) {
@@ -22,9 +23,10 @@ static uint32_t __linear_kmalloc(uint32_t size, int align, uint32_t *physical) {
 }
 
 static uint32_t __kmalloc(uint32_t size, int align, uint32_t *physical) {
+    uint32_t new;
     if (kernel_heap) {
         extern page_directory_t *kernel_directory;
-        uint32_t new = (uint32_t)heap_alloc(kernel_heap, size, align);
+        new = (uint32_t)heap_alloc(kernel_heap, size, align);
         // TODO: this is utterly broken for *physical.
         // If the allocation does not span across consecutive regions,
         // the physical address will be only valid for the allocations
@@ -42,10 +44,11 @@ static uint32_t __kmalloc(uint32_t size, int align, uint32_t *physical) {
                 ((uint32_t)new & ~PAGE_ADDR_MASK);
         }
 
-        return new;
     } else  {
-        return __linear_kmalloc(size, align, physical);
+        new = __linear_kmalloc(size, align, physical);
     }
+
+    return new;
 }
 
 // Plain kmalloc
