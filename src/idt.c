@@ -32,34 +32,6 @@ BUILD_BUG_ON_SIZEOF(idt_flags_t, 1);
 BUILD_BUG_ON_SIZEOF(idt_entry_t, 8);
 BUILD_BUG_ON_SIZEOF(idt_ptr_t, 6);
 
-static void test_idt_structs(void) {
-    #define __cast(type, value) (*(type*) &value)
-    #define check(type, af, value) (__cast(type, af) == (value))
-    #define test(blob, value) if (!check(uint8_t, blob, value)) {             \
-            printk("In %s: FAILED test on %s\n", __FILE__, #blob);            \
-            printk("\tGot %o, expected %o\n", __cast(uint8_t, blob), value);  \
-        }
-
-    idt_flags_t flags;
-        flags.gate_type = 0;
-        flags.storage_segment = 0;
-        flags.privilege_level = 0;
-        flags.present = 0;
-    test(flags, 0000);
-        flags.gate_type = 9;
-    test(flags, 0011);
-        flags.storage_segment = 1;
-    test(flags, 0031);
-        flags.privilege_level = 3;
-    test(flags, 0171);
-        flags.present = 1;
-    test(flags, 0371);
-
-    #undef test
-    #undef check
-    #undef __cast
-}
-
 //
 // Actual code below
 //
@@ -154,8 +126,6 @@ static void remap_pic(void) {
 }
 
 void init_idt(void) {
-    test_idt_structs();
-
     idt_ptr.size = sizeof(idt_entries)-1;
     idt_ptr.entries_addr = (uint32_t)&idt_entries;
 
