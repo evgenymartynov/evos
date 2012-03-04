@@ -3,7 +3,6 @@
 #include "gdt.h"
 #include "idt.h"
 #include "timer.h"
-#include "paging.h"
 #include "panic.h"
 #include "stdint.h"
 #include "multiboot.h"
@@ -47,11 +46,10 @@ char *kernel_relocated_stack;
 // Interrupts are disabled at this point in time
 int kmain(multiboot_info_t *mboot) {
     monitor_clear();
+    // Extract ELF symbols for nice panic stack traces
     init_panic_backtrace(mboot);
+    // Initialise frame-allocator, paging, heap
     init_mem(mboot);
-    init_gdt(0);
-    init_idt();
-    init_paging(); // Also enables kernel heap
 
     // Switch to a different stack. GRUB leaves us in an undefined state.
     #define STACK_SZ 0x10000
@@ -103,6 +101,7 @@ void jump_usermode(void) {
 // Interrupts are still disabled here.
 void __kmain(void) {
     init_gdt(1);
+    init_idt();
     init_timer(50);
     init_syscalls();
 
