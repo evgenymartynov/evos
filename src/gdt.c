@@ -129,6 +129,8 @@ void init_gdt(void) {
     );
 }
 
+extern char *new_stack;
+
 static void write_tss(gdt_entry_t *ent) {
     uint32_t base = (uint32_t)&tss;
     uint32_t limit = sizeof(tss);
@@ -150,9 +152,10 @@ static void write_tss(gdt_entry_t *ent) {
     ent->granularity.operand_size = 0;
     ent->granularity.granularity = 0;
 
+    memset(&tss, 0, sizeof(tss));
     tss.ss0 = 0x10;
-    extern char *new_stack;
-    tss.esp0 = (uint32_t)new_stack;   // TODO: per-task ESP0
+    // WHY DOES THIS WORK!?!?!?!
+    tss.esp0 = (uint32_t)new_stack + 0x1000;   // TODO: per-task ESP0
     tss.cs = 0x08 | 3; // can switch to it from ring 3
     tss.ss = tss.ds = tss.es = tss.fs = tss.gs = 0x10 | 3;
 }

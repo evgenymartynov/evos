@@ -64,12 +64,12 @@ void init_paging(void) {
     // Identity map whatever we have already used
     // and then some more - we need that to transition to kernel heap
     for (i = 0; i < mem_first_unused + PAGE_SIZE * 4; i += PAGE_SIZE) {
-        alloc_frame(get_page(i, TRUE, kernel_directory), FALSE, FALSE);
+        alloc_frame(get_page(i, TRUE, kernel_directory), FALSE, TRUE);
     }
 
     // Now map the heap
     for (i = KHEAP_START; i < KHEAP_START+KHEAP_INITIAL_SIZE; i += PAGE_SIZE) {
-        alloc_frame(get_page(i, FALSE, kernel_directory), FALSE, FALSE);
+        alloc_frame(get_page(i, FALSE, kernel_directory), FALSE, TRUE);
     }
 
     printk("Setting up paging");
@@ -79,7 +79,7 @@ void init_paging(void) {
 
     printk("Setting up the heap");
     kernel_heap = heap_create(KHEAP_START, \
-        KHEAP_START+KHEAP_INITIAL_SIZE, KHEAP_MAX_ADDRESS, FALSE, FALSE);
+        KHEAP_START+KHEAP_INITIAL_SIZE, KHEAP_MAX_ADDRESS, FALSE, TRUE);
     report_success();
 }
 

@@ -9,6 +9,9 @@
 #include "multiboot.h"
 #include "mem.h"
 #include "kmalloc.h"
+#include "syscall.h"
+
+#include "usermode/printf.h"
 
 static void __attribute__((unused)) test_screen(void) {
     int i;
@@ -83,7 +86,6 @@ int kmain(multiboot_info_t *mboot) {
     // Switch to a different stack. GRUB leaves us in an undefined state.
     #define STACK_SZ 0x100000
     new_stack = (char*)kmalloc_a(STACK_SZ) + STACK_SZ;
-    printk("moving stack to %p\n", new_stack);
     char *old_stack = 0;
     asm volatile (
         "movl %%esp, %0 \n"
@@ -100,11 +102,14 @@ int kmain(multiboot_info_t *mboot) {
 }
 
 void umode(void) {
-    printk("User-mode!\n");
+    uint32_t written = printf("User-mode!\n");
+    printf("That write() said it wrote %d characters\n", written);
     for(;;);
 }
 
 void jump_usermode(void) {
+    printk("Transitioning into ring 3\n\n");
+
     asm volatile(
         "movw $0x23, %%ax;"
         "movw %%ax, %%ds;"
@@ -112,12 +117,11 @@ void jump_usermode(void) {
         "movw %%ax, %%fs;"
         "movw %%ax, %%gs;"
 
-        "cli;"
-
         "movl %%esp, %%eax;"
         "pushl $0x23;"
         "pushl %%eax;"
         "pushf;"
+        "pop %%eax; or $0x200, %%eax; push %%eax;"
         "pushl $0x1b;"
         "pushl $umode;"
         "iret;"
@@ -129,6 +133,7 @@ void jump_usermode(void) {
 // Interrupts are still disabled here.
 void __kmain(void) {
     init_timer(50);
+    init_syscalls();
 
     asm volatile ("sti");
 

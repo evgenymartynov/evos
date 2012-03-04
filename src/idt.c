@@ -76,6 +76,7 @@ extern void isr_28(void);
 extern void isr_29(void);
 extern void isr_30(void);
 extern void isr_31(void);
+extern void isr_0x80(void);
 extern void irq_0(void);
 extern void irq_1(void);
 extern void irq_2(void);
@@ -173,6 +174,12 @@ void init_idt(void) {
     SET_HANDLER(29, 0x08, flags);
     SET_HANDLER(30, 0x08, flags);
     SET_HANDLER(31, 0x08, flags);
+
+    // Syscall handler
+    flags.privilege_level = 3;
+    SET_HANDLER(0x80, 0x08, flags);
+    flags.privilege_level = 0;
+
     #undef SET_HANDLER
     #define SET_IRQ_HANDLER(i, segment, flags)  \
         idt_set_handler(&idt_entries[32+i], (uint32_t)&irq_##i, segment, flags);

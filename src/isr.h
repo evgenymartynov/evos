@@ -16,6 +16,7 @@ isr_handler_t isr_register_handler(uint32_t int_no, isr_handler_t handler);
 
 extern isr_handler_t interrupt_handlers[256];
 
-#define PAGE_FAULT_ISR 14
+#define PAGE_FAULT_ISR  14
+#define ISR_SYSCALL     0x80
 
 #endif
