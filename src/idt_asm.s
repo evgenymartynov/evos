@@ -2,8 +2,8 @@
     [GLOBAL isr_%1]
     isr_%1:
         cli
-        push byte 0
-        push byte %1
+        push dword 0
+        push dword %1
         jmp isr_common_stub
 %endmacro
 
@@ -11,7 +11,7 @@
     [GLOBAL isr_%1]
     isr_%1:
         cli
-        push byte %1
+        push dword %1
         jmp isr_common_stub
 %endmacro
 
