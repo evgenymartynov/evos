@@ -34,8 +34,8 @@ typedef struct {
 void init_paging(void);
 void switch_page_directory(page_directory_t *dir);
 
-void alloc_frame(page_t *page, int kernel_mode, int writeable);
-void free_frame(page_t *page);
+void page_alloc(page_t *page, int kernel_mode, int writeable);
+void page_free(page_t *page);
 page_t* get_page(uint32_t address, int create_missing, page_directory_t *dir);
 
 void page_fault_handler(registers_t *regs);

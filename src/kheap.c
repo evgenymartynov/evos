@@ -92,7 +92,7 @@ static void expand(heap_t *heap, uint32_t new_size) {
 
     uint32_t i;
     for (i = old_size; i < new_size; i += PAGE_SIZE) {
-        alloc_frame(get_page(heap->allocated_start + i, TRUE, kernel_directory),
+        page_alloc(get_page(heap->allocated_start + i, TRUE, kernel_directory),
             !heap->pages_user_mode, heap->pages_writeable);
     }
 

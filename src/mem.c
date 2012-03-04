@@ -2,6 +2,7 @@
 #include "printk.h"
 #include "panic.h"
 #include "monitor.h"
+#include <mm/frame.h>
 
 extern uint32_t __end;
 
@@ -76,4 +77,7 @@ void init_mem(multiboot_info_t *mboot) {
     } else {
         panic("Insufficient memory");
     }
+
+    // Proceed to set up the frame-allocator, paging, and the heap
+    init_frames(mem_total_bytes);
 }
