@@ -6,9 +6,6 @@
 #include "kmalloc.h"
 #include "ordered_array.h"
 
-#include "printk.h"
-#include "string.h"
-
 typedef struct {
     uint32_t magic;
     int is_hole;
