@@ -7,7 +7,7 @@
 #define PIT_CLOCK_FREQ 1193180
 #define IRQ_0 32
 
-static void timer_callback(registers_t regs) {
+static void timer_callback(registers_t *regs) {
     // printk("tick ");
 }
 

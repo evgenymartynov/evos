@@ -10,7 +10,7 @@ typedef struct {
     uint32_t eip, cs, eflags, useresp, ss;
 } __attribute__((packed)) registers_t;
 
-typedef void (*isr_handler_t)(registers_t);
+typedef void (*isr_handler_t)(registers_t*);
 
 isr_handler_t isr_register_handler(uint32_t int_no, isr_handler_t handler);
 

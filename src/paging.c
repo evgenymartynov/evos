@@ -115,15 +115,15 @@ void switch_page_directory(page_directory_t *dir) {
     asm volatile ("movl %0, %%cr0" : : "r"(cr0));
 }
 
-void page_fault_handler(registers_t regs) {
+void page_fault_handler(registers_t *regs) {
     uint32_t fault_address;
     asm volatile ("movl %%cr2, %0" : "=r"(fault_address));
 
-    int present =   (regs.err_code & 1);
-    int on_write =  (regs.err_code & 2);
-    int user_mode = (regs.err_code & 4);
-    int reserved =  (regs.err_code & 8);
-    int op_fetch =  (regs.err_code & 16);
+    int present =   (regs->err_code & 1);
+    int on_write =  (regs->err_code & 2);
+    int user_mode = (regs->err_code & 4);
+    int reserved =  (regs->err_code & 8);
+    int op_fetch =  (regs->err_code & 16);
 
     printk("Page-fault: page %spresent; failed on %s in %s-mode at 0x%08x\n",
         present     ? ""        : "NOT "    ,
@@ -133,7 +133,7 @@ void page_fault_handler(registers_t regs) {
     );
     if (reserved) printk("Also trampled reserved bits\n");
     if (op_fetch) printk("Error occurred during op-fetch\n");
-    printk("At eip=%p\n", regs.eip);
+    printk("At eip=%p\n", regs->eip);
 
     panic("Page fault!");
 }

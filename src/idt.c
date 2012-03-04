@@ -232,7 +232,7 @@ static const char *default_interrupt_name = "unknown";
 void isr_common_handler(registers_t regs) {
     isr_handler_t handler = interrupt_handlers[regs.int_no];
     if (handler) {
-        handler(regs);
+        handler(&regs);
     } else {
         const char *name = interrupt_name[regs.int_no];
         if (!name) name = default_interrupt_name;
@@ -248,7 +248,7 @@ void isr_common_handler(registers_t regs) {
 void irq_common_handler(registers_t regs) {
     isr_handler_t handler = interrupt_handlers[regs.int_no];
     if (handler) {
-        handler(regs);
+        handler(&regs);
     }
 
     // Notify slave PIC that we are done

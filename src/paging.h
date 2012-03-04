@@ -38,6 +38,6 @@ void alloc_frame(page_t *page, int kernel_mode, int writeable);
 void free_frame(page_t *page);
 page_t* get_page(uint32_t address, int create_missing, page_directory_t *dir);
 
-void page_fault_handler(registers_t regs);
+void page_fault_handler(registers_t *regs);
 
 #endif
