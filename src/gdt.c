@@ -86,11 +86,9 @@ tss_entry_t tss;
 extern void gdt_load(uint32_t);
 static void gdt_set_entry(gdt_entry_t *ent, uint32_t base, uint32_t limit, access_flags_t access_flags, int use_4kib);
 static void write_tss(gdt_entry_t *ent);
+extern char *kernel_relocated_stack;
 
-void init_gdt(void) {
-    gdt_ptr.limit = sizeof(gdt_entry_t)*NUM_GDT_ENTRIES - 1; // yes, -1 is right
-    gdt_ptr.base  = (uint32_t)&gdt_entries;
-
+void init_gdt(int init_tss) {
     access_flags_t af = {};
 
     // Null segment
@@ -114,22 +112,27 @@ void init_gdt(void) {
     af.is_code = 0;
     gdt_set_entry(&gdt_entries[4], 0, 0xFFFFFFFF, af, 1);
 
+    gdt_ptr.base  = (uint32_t)&gdt_entries;
+    gdt_ptr.limit = sizeof(gdt_entry_t)*NUM_GDT_ENTRIES - 1; // yes, -1 is right
+
     // TSS
-    write_tss(&gdt_entries[5]);
+    if (init_tss) {
+        write_tss(&gdt_entries[5]);
+    }
 
     printk("Loading a new GDT");
     gdt_load((uint32_t)&gdt_ptr);
     report_success();
 
-    // Flush the TSS
-    asm volatile (
-        "movl $0x2b, %%eax;"
-        "ltr %%ax;"
-        : : : "eax"
-    );
+    if (init_tss) {
+        // Flush the TSS
+        asm volatile (
+            "movl $0x2b, %%eax;"
+            "ltr %%ax;"
+            : : : "eax"
+        );
+    }
 }
-
-extern char *new_stack;
 
 static void write_tss(gdt_entry_t *ent) {
     uint32_t base = (uint32_t)&tss;
@@ -155,9 +158,11 @@ static void write_tss(gdt_entry_t *ent) {
     memset(&tss, 0, sizeof(tss));
     tss.ss0 = 0x10;
     // WHY DOES THIS WORK!?!?!?!
-    tss.esp0 = (uint32_t)new_stack + 0x1000;   // TODO: per-task ESP0
+    tss.esp0 = (uint32_t)kernel_relocated_stack;   // TODO: per-task ESP0
     tss.cs = 0x08 | 3; // can switch to it from ring 3
     tss.ss = tss.ds = tss.es = tss.fs = tss.gs = 0x10 | 3;
+
+    printk("Installed tss.esp0: %p\n", tss.esp0);
 }
 
 static void gdt_set_entry(gdt_entry_t *ent, uint32_t base, uint32_t limit, access_flags_t access_flags, int use_4kib) {

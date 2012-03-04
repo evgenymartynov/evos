@@ -40,7 +40,7 @@ static void __attribute__((unused)) test_kmalloc(void) {
     }
 }
 
-char *new_stack;
+char *kernel_relocated_stack;
 
 // This is the entry point from boot.s
 // We need to change the stack ASAP
@@ -49,13 +49,13 @@ int kmain(multiboot_info_t *mboot) {
     monitor_clear();
     init_panic_backtrace(mboot);
     init_mem(mboot);
-    init_gdt();
+    init_gdt(0);
     init_idt();
     init_paging(); // Also enables kernel heap
 
     // Switch to a different stack. GRUB leaves us in an undefined state.
-    #define STACK_SZ 0x100000
-    new_stack = (char*)kmalloc_a(STACK_SZ) + STACK_SZ;
+    #define STACK_SZ 0x10000
+    kernel_relocated_stack = (char*)kmalloc_a(STACK_SZ) + STACK_SZ;
     char *old_stack = 0;
     asm volatile (
         "movl %%esp, %0 \n"
@@ -63,7 +63,7 @@ int kmain(multiboot_info_t *mboot) {
         "call __kmain   \n"
         "movl %0, %%esp \n"
         : "=m"(old_stack)
-        : "m"(new_stack)
+        : "m"(kernel_relocated_stack)
     );
     #undef STACK_SZ
 
@@ -102,6 +102,7 @@ void jump_usermode(void) {
 // This is a continuation of kmain(...), with a new stack
 // Interrupts are still disabled here.
 void __kmain(void) {
+    init_gdt(1);
     init_timer(50);
     init_syscalls();
 
