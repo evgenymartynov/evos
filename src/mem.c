@@ -3,7 +3,7 @@
 #include "panic.h"
 #include "monitor.h"
 #include <mm/frame.h>
-#include "paging.h"
+#include <mm/paging.h>
 
 extern uint32_t __end;
 

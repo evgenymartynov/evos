@@ -2,7 +2,7 @@
 #include "stddef.h"
 #include "assert.h"
 #include "mem.h"
-#include "paging.h"
+#include <mm/paging.h>
 #include "kmalloc.h"
 #include "ordered_array.h"
 

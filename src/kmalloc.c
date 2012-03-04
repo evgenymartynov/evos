@@ -3,8 +3,7 @@
 #include "stdint.h"
 #include "stddef.h"
 #include "kheap.h"
-#include "paging.h"
-#include "printk.h"
+#include <mm/paging.h>
 
 static uint32_t __linear_kmalloc(uint32_t size, int align, uint32_t *physical) {
     if (align && (mem_first_unused & ~PAGE_ADDR_MASK)) {
