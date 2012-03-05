@@ -43,8 +43,8 @@ static void syscall_handler(registers_t *regs) {
         "call *%6;"
         "movl %%eax, %0;"
         "add $20, %%esp;"
-        : "=a"(regs->eax)
-        : "r"(regs->ebx), "r"(regs->ecx), "r"(regs->edx), "r"(regs->esi), "r"(regs->edi), "r"(func)
+        : "=m"(regs->eax)
+        : "m"(regs->ebx), "m"(regs->ecx), "m"(regs->edx), "m"(regs->esi), "m"(regs->edi),  "r"(func)
     );
 }
 
