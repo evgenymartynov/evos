@@ -1,8 +1,8 @@
 #include "kmalloc.h"
-#include "mem.h"
 #include "stdint.h"
 #include "stddef.h"
 #include "kheap.h"
+#include <mm/mem.h>
 #include <mm/paging.h>
 
 static uint32_t __linear_kmalloc(uint32_t size, int align, uint32_t *physical) {

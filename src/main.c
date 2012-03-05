@@ -6,7 +6,7 @@
 #include "panic.h"
 #include "stdint.h"
 #include "multiboot.h"
-#include "mem.h"
+#include <mm/mem.h>
 #include "kmalloc.h"
 #include "syscall.h"
 

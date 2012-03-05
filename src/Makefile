@@ -7,9 +7,9 @@ CFLAGS+=-O3 -fno-optimize-sibling-calls
 
 SOURCES=boot.o main.o ports.o monitor.o printk.o string.o 	\
 		gdt.o gdt_asm.o idt.o idt_asm.o isr.o panic.o 		\
-		timer.o kmalloc.o mem.o kheap.o
+		timer.o kmalloc.o kheap.o
 
-SOURCES += mm/frame.o mm/paging.o
+SOURCES += mm/mem.o mm/frame.o mm/paging.o
 
 SOURCES += syscall.o
 SOURCES += usermode/syscall.o usermode/printf.o

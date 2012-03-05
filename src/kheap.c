@@ -1,7 +1,7 @@
 #include "kheap.h"
 #include "stddef.h"
 #include "assert.h"
-#include "mem.h"
+#include <mm/mem.h>
 #include <mm/paging.h>
 #include "kmalloc.h"
 #include "ordered_array.h"
