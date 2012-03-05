@@ -1,6 +1,6 @@
 #include "frame.h"
 #include "mem.h"
-#include "bitset.h"
+#include <datastructs/bitset.h>
 #include "panic.h"
 
 static bitset_t frames; // TODO allocate

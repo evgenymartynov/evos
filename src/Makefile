@@ -10,11 +10,12 @@ SOURCES=boot.o main.o ports.o monitor.o printk.o string.o 	\
 		timer.o kmalloc.o kheap.o
 
 SOURCES += mm/mem.o mm/frame.o mm/paging.o
+SOURCES += datastructs/bitset.o
 
 SOURCES += syscall.o
 SOURCES += usermode/syscall.o usermode/printf.o
 
-SOURCES += bitset.o ordered_array.o
+SOURCES += ordered_array.o
 
 .DEFAULT_GOAL=all
 .PHONY=all clean
@@ -23,7 +24,8 @@ all: $(SOURCES)
 	ld $(LDFLAGS) -o ../bin/kernel $(SOURCES)
 
 clean:
-	-rm *.o ../bin/kernel
+	-find . -name '*.o' -exec rm {} \;
+	-rm ../bin/kernel
 
 .s.o:
 	nasm $(ASFLAGS) $<
