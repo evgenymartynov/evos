@@ -2,7 +2,7 @@
 #define _KHEAP_H_
 
 #include "stdint.h"
-#include "ordered_array.h"
+#include <datastructs/ordered_array.h>
 
 #define KHEAP_START         0x0f000000
 #define KHEAP_MAX_ADDRESS   0x0ffff000

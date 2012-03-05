@@ -1,10 +1,10 @@
 #include "kheap.h"
 #include "stddef.h"
 #include "assert.h"
+#include "kmalloc.h"
 #include <mm/mem.h>
 #include <mm/paging.h>
-#include "kmalloc.h"
-#include "ordered_array.h"
+#include <datastructs/ordered_array.h>
 
 typedef struct {
     uint32_t magic;
