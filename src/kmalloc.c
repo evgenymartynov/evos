@@ -1,5 +1,4 @@
 #include "kmalloc.h"
-#include "stdint.h"
 #include "stddef.h"
 #include "kheap.h"
 #include <mm/mem.h>

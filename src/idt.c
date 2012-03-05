@@ -3,7 +3,6 @@
 #include "isr.h"
 #include "panic.h"
 
-#include "stdint.h"
 #include "stddef.h"
 #include "printk.h"
 #include "string.h"

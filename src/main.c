@@ -4,7 +4,7 @@
 #include "idt.h"
 #include "timer.h"
 #include "panic.h"
-#include "stdint.h"
+#include "stddef.h"
 #include "multiboot.h"
 #include <mm/mem.h>
 #include "kmalloc.h"

@@ -1,7 +1,7 @@
 #ifndef _ISR_H_
 #define _ISR_H_
 
-#include "stdint.h"
+#include "stddef.h"
 
 typedef struct {
     uint32_t ds;

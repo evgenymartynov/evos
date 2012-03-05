@@ -1,6 +1,6 @@
 #include "syscall.h"
 #include "isr.h"
-#include "stdint.h"
+#include "stddef.h"
 
 #include "printk.h"
 static uint32_t tty_write(const char *data, uint32_t count) {

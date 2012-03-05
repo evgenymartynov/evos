@@ -1,7 +1,7 @@
 #ifndef _PAGING_H_
 #define _PAGING_H_
 
-#include "stdint.h"
+#include "stddef.h"
 #include "isr.h"
 
 #define PAGES_PER_TABLE         1024

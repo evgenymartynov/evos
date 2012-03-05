@@ -1,7 +1,7 @@
 #ifndef _KHEAP_H_
 #define _KHEAP_H_
 
-#include "stdint.h"
+#include "stddef.h"
 #include <datastructs/ordered_array.h>
 
 #define KHEAP_START         0x0f000000

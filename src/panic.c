@@ -1,6 +1,5 @@
 #include "panic.h"
 #include "printk.h"
-#include "stdint.h"
 #include "string.h"
 #include "kmalloc.h"
 

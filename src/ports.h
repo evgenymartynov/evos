@@ -1,7 +1,7 @@
 #ifndef _PORTS_H_
 #define _PORTS_H_
 
-#include "stdint.h"
+#include "stddef.h"
 
 typedef uint16_t port_t;
 

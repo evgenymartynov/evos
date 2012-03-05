@@ -1,5 +1,4 @@
 #include "gdt.h"
-#include "stdint.h"
 #include "stddef.h"
 #include "printk.h"
 #include "string.h"

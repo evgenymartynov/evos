@@ -1,7 +1,7 @@
 #ifndef _ORDERED_ARRAY_H_
 #define _ORDERED_ARRAY_H_
 
-#include "stdint.h"
+#include "stddef.h"
 
 typedef void *type_t;
 typedef int (*less_than_cmp)(type_t, type_t);

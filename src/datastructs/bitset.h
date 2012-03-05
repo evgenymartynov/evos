@@ -1,7 +1,7 @@
 #ifndef _BITSET_H_
 #define _BITSET_H_
 
-#include "stdint.h"
+#include "stddef.h"
 
 typedef struct {
     uint32_t *base;
