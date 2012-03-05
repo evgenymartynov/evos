@@ -10,13 +10,14 @@ static uint16_t cur_x, cur_y;
 // Generates a framebuffer colour attribute
 #define FB_ATTR(fg, bg) ( ( (uint8_t )(bg) << 4 ) | (uint8_t )(fg) )
 
-static const uint8_t COL_WHITE = 15;
-static const uint8_t COL_RED   = 4;
-static const uint8_t COL_GREEN = 2;
-static const uint8_t COL_BLACK = 0;
+#define COL_WHITE 15
+#define COL_LTGREY 7
+#define COL_RED   4
+#define COL_GREEN 2
+#define COL_BLACK 0
 // TODO: define all the colours
 
-static const uint16_t BLANK = FB_WORD(' ', FB_ATTR(15, 0));
+static const uint16_t BLANK = FB_WORD(' ', FB_ATTR(COL_LTGREY, COL_BLACK));
 
 static void move_cursor() {
     uint16_t position = 80*cur_y + cur_x;
@@ -72,7 +73,7 @@ static void __monitor_put(char value, uint8_t attributes) {
 }
 
 void monitor_put(char value) {
-    __monitor_put(value, FB_ATTR(COL_WHITE, COL_BLACK));
+    __monitor_put(value, FB_ATTR(COL_LTGREY, COL_BLACK));
 }
 
 void monitor_clear() {
