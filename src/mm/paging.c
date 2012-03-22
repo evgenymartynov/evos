@@ -13,6 +13,9 @@ BUILD_BUG_ON_SIZEOF(page_t, 4);
 
 #define CR0_PG_BIT  0x80000000
 
+extern void clone_physical_page(uint32_t src, uint32_t dest);
+static page_table_t* clone_table(const page_table_t *src, uint32_t *physical);
+
 page_directory_t *kernel_directory  = 0;
 page_directory_t *current_directory = 0;
 
@@ -36,8 +39,11 @@ void page_free(page_t *page) {
 }
 
 void init_paging(void) {
-    kernel_directory = (page_directory_t*) kmalloc_a(sizeof(page_directory_t));
+    uint32_t physical;
+    kernel_directory = (page_directory_t*) kmalloc_ap(sizeof(page_directory_t), &physical);
     memset(kernel_directory, 0, sizeof(page_directory_t));
+    const uint32_t offset = (uint32_t)&kernel_directory->tables_physical_addr - (uint32_t)kernel_directory;
+    kernel_directory->ismeta_tables_physical_addr = physical + offset;
 
     uint32_t i;
     // Prepare pages for the heap before identity-mapping the area
@@ -75,6 +81,11 @@ void init_paging(void) {
     kernel_heap = heap_create(KHEAP_START,
         KHEAP_START+KHEAP_INITIAL_SIZE, KHEAP_MAX_ADDRESS, FALSE, TRUE);
     report_success();
+
+    // Just to make GCC shut up... and to test codes.
+    printk("Trying to clone the page directory");
+    switch_page_directory(clone_directory(kernel_directory));
+    report_success();
 }
 
 page_t* get_page(uint32_t address, int create_missing, page_directory_t *dir) {
@@ -100,9 +111,50 @@ page_t* get_page(uint32_t address, int create_missing, page_directory_t *dir) {
     }
 }
 
+page_directory_t *clone_directory(page_directory_t *src) {
+    uint32_t physical;
+    page_directory_t *dir = (page_directory_t*)kmalloc_ap(sizeof(*dir), &physical);
+    memset(dir, 0, sizeof(*dir));
+
+    const uint32_t offset = (uint32_t)&dir->tables_physical_addr - (uint32_t)dir;
+    dir->ismeta_tables_physical_addr = physical + offset;
+
+    int i;
+    for (i = 0; i < TABLES_PER_DIRECTORY; i++) {
+        if (src->tables[i]) {
+            if (kernel_directory->tables[i] == src->tables[i]) {
+                dir->tables[i] = src->tables[i];
+                dir->tables_physical_addr[i] = src->tables_physical_addr[i];
+            } else {
+                uint32_t physical;
+                dir->tables[i] = clone_table((page_table_t*)src->tables[i], &physical);
+                dir->tables_physical_addr[i] = physical | 7;
+            }
+        }
+    }
+
+    return dir;
+}
+
+static page_table_t* clone_table(const page_table_t *src, uint32_t *physical) {
+    page_table_t *dest = (page_table_t*)kmalloc_ap(sizeof(*dest), physical);
+    memset(dest, 0, sizeof(*dest));
+
+    int i;
+    for (i = 0; i < PAGES_PER_TABLE; i++) {
+        const page_t *sp = &src->pages[i];
+        if (sp->address) {
+            page_alloc(&dest->pages[i], !sp->user_mode, sp->writeable);
+            clone_physical_page(sp->address * PAGE_SIZE, dest->pages[i].address * PAGE_SIZE);
+        }
+    }
+
+    return dest;
+}
+
 void switch_page_directory(page_directory_t *dir) {
     current_directory = dir;
-    asm volatile ("movl %0, %%cr3" : : "r"(&dir->tables_physical_addr));
+    asm volatile ("movl %0, %%cr3" : : "r"(dir->ismeta_tables_physical_addr));
 
     uint32_t cr0;
     asm volatile ("movl %%cr0, %0" : "=r"(cr0));

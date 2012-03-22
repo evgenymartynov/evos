@@ -24,15 +24,17 @@ typedef struct {
 } __attribute__((packed)) page_table_t;
 
 typedef struct {
+    // Actual tables in the virtual addressing scheme
     page_table_t    *tables[TABLES_PER_DIRECTORY];
+    // Physical locations of the above.
     uint32_t tables_physical_addr[TABLES_PER_DIRECTORY];
-
-    // This tutorial is confusing. WHY?!?!?
+    // Physical location of the above. Addresception.
     uint32_t ismeta_tables_physical_addr;
 } page_directory_t;
 
 void init_paging(void);
 void switch_page_directory(page_directory_t *dir);
+page_directory_t *clone_directory(page_directory_t *src);
 
 void page_alloc(page_t *page, int kernel_mode, int writeable);
 void page_free(page_t *page);
