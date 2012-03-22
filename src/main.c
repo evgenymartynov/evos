@@ -9,6 +9,7 @@
 #include <mm/mem.h>
 #include "kmalloc.h"
 #include "syscall.h"
+#include <task/task.h>
 
 #include "usermode/printf.h"
 
@@ -70,30 +71,31 @@ int kmain(multiboot_info_t *mboot) {
 }
 
 void umode(void) {
-    uint32_t written = printf("User-mode!\n");
-    printf("That write() said it wrote %d characters\n", written);
-    for(;;);
+    asm volatile(
+        ".loop:"
+            "movl $1, %%eax;"
+            "movl %0, %%ebx;"
+            "movl %1, %%ecx;"
+            "int $0x80;"
+            ".here: jmp .here;"
+            "jmp .loop;"
+        :
+        : "r" ("1234\n"), "r"(5)
+        : "eax", "ebx", "ecx"
+    );
 }
 
-void jump_usermode(void) {
-    printk("Transitioning into ring 3\n\n");
-
+void umode2(void) {
     asm volatile(
-        "movw $0x23, %%ax;"
-        "movw %%ax, %%ds;"
-        "movw %%ax, %%es;"
-        "movw %%ax, %%fs;"
-        "movw %%ax, %%gs;"
-
-        "movl %%esp, %%eax;"
-        "pushl $0x23;"
-        "pushl %%eax;"
-        "pushf;"
-        "pop %%eax; or $0x200, %%eax; push %%eax;"
-        "pushl $0x1b;"
-        "pushl $umode;"
-        "iret;"
-        : : : "eax"
+        ".loop2:"
+            "movl $1, %%eax;"
+            "movl %0, %%ebx;"
+            "movl %1, %%ecx;"
+            "int $0x80;"
+            "jmp .loop2;"
+        :
+        : "r" ("5678\n"), "r"(5)
+        : "eax", "ebx", "ecx"
     );
 }
 
@@ -112,5 +114,11 @@ void __kmain(void) {
 
     test_kmalloc();
 
-    jump_usermode();
+    init_tasking();
+
+    // TODO: actually use init()
+    pid_t init_pid = task_create(umode, 0);
+    printk("Spawned a task with pid=%d\n", init_pid);
+    init_pid = task_create(umode2, 0);
+    printk("Spawned a task with pid=%d\n", init_pid);
 }

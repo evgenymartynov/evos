@@ -1,7 +1,7 @@
 #include "syscall.h"
 #include "isr.h"
 #include "stddef.h"
-
+#include <task/task.h>
 #include "printk.h"
 static uint32_t tty_write(const char *data, uint32_t count) {
     int i;
@@ -26,7 +26,7 @@ static void *syscalls[NUM_SYSCALLS] = {
 #undef SYSCALL
 
 static void syscall_handler(registers_t *regs) {
-    printk("Received syscall %#x\n", regs->eax);
+    // printk("Received syscall %#x\n", regs->eax);
     if (regs->eax >= NUM_SYSCALLS) {
         printk("Invalid syscall! Returning.\n");
         regs->eax = -1;

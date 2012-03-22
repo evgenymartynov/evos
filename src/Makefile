@@ -12,7 +12,7 @@ SOURCES=boot.o main.o ports.o monitor.o printk.o string.o 	\
 SOURCES += mm/mem.o mm/frame.o mm/paging.o
 SOURCES += datastructs/bitset.o datastructs/ordered_array.o
 
-SOURCES += syscall.o
+SOURCES += syscall.o task/task.o
 SOURCES += usermode/syscall.o usermode/printf.o
 
 .DEFAULT_GOAL=all

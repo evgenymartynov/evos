@@ -1,7 +1,7 @@
 #include "timer.h"
 #include "isr.h"
 #include "ports.h"
-
+#include <task/task.h>
 #include "printk.h"
 
 #define PIT_CLOCK_FREQ 1193180
@@ -9,6 +9,7 @@
 
 static void timer_callback(registers_t *regs) {
     // printk("tick ");
+    task_switch();
 }
 
 void init_timer(uint32_t freq) {

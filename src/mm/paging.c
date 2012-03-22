@@ -184,7 +184,24 @@ static void clone_page_to_physical(uint32_t src_virtual, uint32_t dest_physical)
 
     memcpy((void*)PAGE_CLONING_BUFFER, (void*)src_virtual, PAGE_SIZE);
 
-    cloning_buffer_page->present = FALSE;
+    // cloning_buffer_page->present = FALSE;
+    invalidate_page(PAGE_CLONING_BUFFER);
+}
+
+// TODO: move to a separate file
+void mm_memcpy_physical(uint32_t dest_physical, void *src, uint32_t size) {
+    if ((dest_physical & 0x0FFF) + size > 0x1000) {
+        panic("mm_memcpy_physical() has not been implemented properly");
+    }
+
+    cloning_buffer_page->address = dest_physical / PAGE_SIZE;
+    cloning_buffer_page->present = TRUE;
+    invalidate_page(PAGE_CLONING_BUFFER);
+
+    uint32_t start_offset = (uint32_t)dest_physical & 0x0FFF;
+    memcpy((void*)(PAGE_CLONING_BUFFER + start_offset), (void*)src, size);
+
+    // cloning_buffer_page->present = FALSE;
     invalidate_page(PAGE_CLONING_BUFFER);
 }
 

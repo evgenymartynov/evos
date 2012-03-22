@@ -36,6 +36,8 @@ typedef struct {
     uint32_t ismeta_tables_physical_addr;
 } page_directory_t;
 
+extern page_directory_t *current_directory;
+
 void init_paging(void);
 void switch_page_directory(page_directory_t *dir);
 page_directory_t *clone_directory(page_directory_t *src);
@@ -45,5 +47,8 @@ void page_free(page_t *page);
 page_t* get_page(uint32_t address, int create_missing, page_directory_t *dir);
 
 void page_fault_handler(registers_t *regs);
+
+// TODO: move into a separate file
+void mm_memcpy_physical(uint32_t dest_physical, void *src, uint32_t size);
 
 #endif
