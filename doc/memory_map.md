@@ -6,4 +6,4 @@ User-space memory map
  * `[..0x10000000]`: per-task kernel stack space. PL=0.
  * `[0x10000000..]`: user task image. PL=3.
  * `[EMPTY PAGE HERE]`: stack guard. *Present=0*; PL=3.
- * `[..+STACK_SIZE]`: user stack space. PL=3.
+ * `[..0xF0000000]`: user stack space. PL=3.
