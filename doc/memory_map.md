@@ -7,3 +7,8 @@ User-space memory map
  * `[0x10000000..]`: user task image. PL=3.
  * `[EMPTY PAGE HERE]`: stack guard. *Present=0*; PL=3.
  * `[..0xF0000000]`: user stack space. PL=3.
+
+Kernel-space memory map
+=======================
+
+ * `[0xF0000000..0xF0001000]`: dud page for page cloning

@@ -7,6 +7,10 @@
 #define PAGES_PER_TABLE         1024
 #define TABLES_PER_DIRECTORY    1024
 
+// A dud page for page cloning
+// We map the target page to this one, and then memcpy it.
+#define PAGE_CLONING_BUFFER     0xF0000000
+
 typedef struct {
     uint32_t  present       :1;
     uint32_t  writeable     :1;

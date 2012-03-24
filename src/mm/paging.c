@@ -13,11 +13,13 @@ BUILD_BUG_ON_SIZEOF(page_t, 4);
 
 #define CR0_PG_BIT  0x80000000
 
-extern void clone_physical_page(uint32_t src, uint32_t dest);
-static page_table_t* clone_table(const page_table_t *src, uint32_t *physical);
+static void clone_page_to_physical(uint32_t src_virtual, uint32_t dest_physical);
+static page_table_t* clone_table(int table_index, const page_table_t *src, uint32_t *physical);
+static void invalidate_page(uint32_t address);
 
 page_directory_t *kernel_directory  = 0;
 page_directory_t *current_directory = 0;
+static page_t *cloning_buffer_page = 0;
 
 void page_alloc(page_t *page, int kernel_mode, int writeable) {
     if (page->address) {
@@ -71,7 +73,11 @@ void init_paging(void) {
         page_alloc(get_page(i, FALSE, kernel_directory), FALSE, TRUE);
     }
 
-    printk("Setting up paging");
+    // And now set up the dud page for cloning
+    cloning_buffer_page = get_page(PAGE_CLONING_BUFFER, TRUE, kernel_directory);
+    page_alloc(cloning_buffer_page, TRUE, TRUE);
+
+    printk("Enabling paging");
     isr_register_handler(PAGE_FAULT_ISR, page_fault_handler);
     switch_page_directory(kernel_directory);
     report_success();
@@ -126,8 +132,9 @@ page_directory_t *clone_directory(page_directory_t *src) {
                 dir->tables[i] = src->tables[i];
                 dir->tables_physical_addr[i] = src->tables_physical_addr[i];
             } else {
+                printk("Clone!\n");
                 uint32_t physical;
-                dir->tables[i] = clone_table((page_table_t*)src->tables[i], &physical);
+                dir->tables[i] = clone_table(i, (page_table_t*)src->tables[i], &physical);
                 dir->tables_physical_addr[i] = physical | 7;
             }
         }
@@ -136,20 +143,49 @@ page_directory_t *clone_directory(page_directory_t *src) {
     return dir;
 }
 
-static page_table_t* clone_table(const page_table_t *src, uint32_t *physical) {
+static page_table_t* clone_table(int table_index, const page_table_t *src, uint32_t *physical) {
     page_table_t *dest = (page_table_t*)kmalloc_ap(sizeof(*dest), physical);
     memset(dest, 0, sizeof(*dest));
 
     int i;
     for (i = 0; i < PAGES_PER_TABLE; i++) {
         const page_t *sp = &src->pages[i];
+        page_t *dp = &dest->pages[i];
         if (sp->address) {
-            page_alloc(&dest->pages[i], !sp->user_mode, sp->writeable);
-            clone_physical_page(sp->address * PAGE_SIZE, dest->pages[i].address * PAGE_SIZE);
+            page_alloc(dp, !sp->user_mode, sp->writeable);
+            uint32_t page_index = table_index * PAGES_PER_TABLE + i;
+            clone_page_to_physical(page_index * PAGE_SIZE, dp->address * PAGE_SIZE);
         }
     }
 
     return dest;
+}
+
+// Call INVLPG on a given address.
+static void invalidate_page(uint32_t address) {
+    asm volatile("invlpg %0" :: "m"((void*)address));
+
+    // TODO: INVLPG does not work :(
+    asm volatile (
+        "xorl %eax, %eax;"
+        "movl %cr3, %eax;"
+        "movl %eax, %cr3;"
+    );
+}
+
+// Given a pair of addresses, copy one page onto another.
+// This uses a dud page - maybe not the best idea, but it works.
+// Takes a virtual src address and a physical destination address.
+// Assumes that given src is accessible in current virtual address space.
+static void clone_page_to_physical(uint32_t src_virtual, uint32_t dest_physical) {
+    cloning_buffer_page->address = dest_physical / PAGE_SIZE;
+    cloning_buffer_page->present = TRUE;
+    invalidate_page(PAGE_CLONING_BUFFER);
+
+    memcpy((void*)PAGE_CLONING_BUFFER, (void*)src_virtual, PAGE_SIZE);
+
+    cloning_buffer_page->present = FALSE;
+    invalidate_page(PAGE_CLONING_BUFFER);
 }
 
 void switch_page_directory(page_directory_t *dir) {

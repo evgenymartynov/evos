@@ -9,7 +9,7 @@ SOURCES=boot.o main.o ports.o monitor.o printk.o string.o 	\
 		gdt.o gdt_asm.o idt.o idt_asm.o isr.o panic.o 		\
 		timer.o kmalloc.o kheap.o
 
-SOURCES += mm/mem.o mm/frame.o mm/paging.o mm/page_manip.o
+SOURCES += mm/mem.o mm/frame.o mm/paging.o
 SOURCES += datastructs/bitset.o datastructs/ordered_array.o
 
 SOURCES += syscall.o
