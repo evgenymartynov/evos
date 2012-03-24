@@ -141,7 +141,7 @@ static void gdt_set_entry(gdt_entry_t *ent, uint32_t base, uint32_t limit, acces
     // Addressable limit
     if (limit > 0xFFFF) {
         // TODO: check that (limit & 0xFFFF) == 0
-        limit >>= 16;
+        limit >>= 12;
         use_4kib = 1;
     }
     ent->limit_lower = limit & 0xFFFF;
