@@ -44,7 +44,7 @@ static void syscall_handler(registers_t *regs) {
         "movl %%eax, %0;"
         "add $20, %%esp;"
         : "=m"(regs->eax)
-        : "m"(regs->ebx), "m"(regs->ecx), "m"(regs->edx), "m"(regs->esi), "m"(regs->edi),  "r"(func)
+        : "m"(regs->ebx), "m"(regs->ecx), "m"(regs->edx), "m"(regs->esi), "m"(regs->edi), "m"(func)
     );
 }
 
